@@ -11,6 +11,27 @@
 *.sln.docstates
 *.env
 
+*.accdb
+*.laccdb
+
+logs
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+dist
+dist-ssr
+.local
+.idea
+.DS_Store
+.ntvs
+*.njsproj
+
+*.sw?
+
+
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

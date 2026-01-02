@@ -1,0 +1,6 @@
+@Inchirieri_Masini.Server_HostAddress = http://localhost:5083
+
+GET {{Inchirieri_Masini.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
