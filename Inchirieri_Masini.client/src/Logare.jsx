@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './ÎnregistrareLogare.css';
 
 function Logare() {
     const [identificator, setIdentificator] = useState('');
     const [password, setPassword] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -13,6 +14,8 @@ function Logare() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        localStorage.removeItem('token');
 
         const loginData = {
             identificator: identificator, 
@@ -30,7 +33,13 @@ function Logare() {
 
             if (response.ok) {
                 const data = await response.json();
-                alert("Logare reușită! Bine ai venit, " + data.utilizator);
+                localStorage.setItem('token', data.token);
+                
+                if (data.profilComplet) {
+                    navigate('/acasa');
+                } else {
+                    navigate('/finalizare-profil');
+                }
             } else {
                 const errorText = await response.text();
                 alert("Eroare la logare: " + errorText);
@@ -70,9 +79,7 @@ function Logare() {
                         </span>
                     </div>
                 </label>
-                
                 <button type="submit">Logare</button>
-                
                 <p style={{textAlign: 'center', marginTop: '15px'}}>
                     Nu ai cont? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}>Inregistreaza-te aici.</Link>      
                 </p>
