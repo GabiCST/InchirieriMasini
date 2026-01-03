@@ -42,6 +42,7 @@ function Register() {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('username', username);
                 alert("Înregistrare reușită!");
                 navigate('/finalizare-profil');
             } else {

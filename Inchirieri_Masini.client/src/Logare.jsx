@@ -34,7 +34,7 @@ function Logare() {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
-                
+                localStorage.setItem('username', data.utilizator);
                 if (data.profilComplet) {
                     navigate('/acasa');
                 } else {
