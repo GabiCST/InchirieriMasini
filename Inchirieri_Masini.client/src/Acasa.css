@@ -1,3 +1,6 @@
+/* Acasa.css - VERSIUNEA FINALĂ UNIFICATĂ */
+
+/* 1. Resetări generale */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -8,26 +11,14 @@ body {
     background-color: #f0f2f5;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .home-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-.main-content {
-    padding: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-.main-content h1 {
-    margin-bottom: 25px;
-    color: #333;
-    border-bottom: 3px solid #007bff;
-    display: inline-block;
-    padding-bottom: 5px;
-}
+/* 2. NAVBAR */
 .navbar {
     background-color: white;
     height: 70px;
@@ -41,10 +32,13 @@ body {
     z-index: 100;
 }
 
+/* --- Stiluri Profil & Dropdown (Reparat) --- */
 .profile-section {
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative; /* Esențial pentru dropdown */
+    user-select: none;
 }
 
 .avatar-circle {
@@ -60,6 +54,55 @@ body {
     font-size: 18px;
 }
 
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Meniul Dropdown care lipsea */
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 10px;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 8px 0;
+    z-index: 1000;
+    border: 1px solid #f0f0f0;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f7fa;
+    color: #007bff;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Search Bar (Cu Animație Reparată) --- */
 .nav-center {
     flex: 1;
     display: flex;
@@ -72,8 +115,15 @@ body {
     border: 1px solid #ddd;
     border-radius: 20px;
     outline: none;
+    transition: width 0.3s ease, border-color 0.3s ease; /* Animația */
 }
 
+.search-bar:focus {
+    width: 65%; /* Se extinde la focus */
+    border-color: #007bff;
+}
+
+/* --- Buton Logout (Îngroșat) --- */
 .logout-btn {
     border: 1px solid #dc3545;
     color: #dc3545;
@@ -82,17 +132,38 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
+    transition: all 0.2s;
 }
+
 .logout-btn:hover {
-    box-shadow: 0 0 0 1px #dc3545;
-    background-color: #fff5f5; 
+    box-shadow: 0 0 0 1px #dc3545; /* Efectul de îngroșare */
+    background-color: #fff5f5;
 }
-.cars-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-    gap: 25px; 
+
+/* 3. LAYOUT PRINCIPAL */
+.main-content {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
 }
+
+.main-content h1 {
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 3px solid #007bff;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+/* 4. GRILA DE MAȘINI */
+.cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    width: 100%;
+}
+
 .car-card {
     background: white;
     border-radius: 12px;
@@ -100,13 +171,15 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: transform 0.2s;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     height: 100%;
+}
 
 .car-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
+
 .card-image {
     width: 100%;
     height: 200px;
@@ -117,7 +190,7 @@ body {
 .card-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover; 
+    object-fit: cover;
 }
 
 .price-tag {
@@ -131,11 +204,12 @@ body {
     font-weight: bold;
     font-size: 14px;
 }
+
 .card-details {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; 
+    flex-grow: 1;
 }
 
 .card-details h3 {
@@ -177,7 +251,7 @@ body {
 }
 
 .rent-btn {
-    margin-top: auto; 
+    margin-top: auto;
     width: 100%;
     padding: 12px;
     background-color: #007bff;
@@ -193,10 +267,10 @@ body {
     background-color: #0056b3;
 }
 
-
+/* 5. PAGINARE */
 .pagination-container {
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
     margin-top: 40px;
     padding-bottom: 40px;
@@ -229,59 +303,4 @@ body {
     color: #6c757d;
     cursor: not-allowed;
     opacity: 0.6;
-}
-
-.profile-section {
-    position: relative;
-    user-select: none; 
-}
-
-
-.profile-dropdown {
-    position: absolute;
-    top: 100%; 
-    left: 0;
-    margin-top: 10px; 
-    background-color: white;
-    min-width: 180px; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    padding: 8px 0;
-    z-index: 1000; 
-    border: 1px solid #f0f0f0;
-    animation: fadeIn 0.2s ease; 
-}
-.dropdown-item {
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.dropdown-item:hover {
-    background-color: #f5f7fa;
-    color: #007bff;
-}
-
-.profile-dropdown::before {
-    content: "";
-    position: absolute;
-    top: -6px;
-    left: 20px;
-    width: 12px;
-    height: 12px;
-    background-color: white;
-    transform: rotate(45deg);
-    border-left: 1px solid #f0f0f0;
-    border-top: 1px solid #f0f0f0;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-    }
 }

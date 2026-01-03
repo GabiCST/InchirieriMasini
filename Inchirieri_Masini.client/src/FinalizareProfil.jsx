@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './FinalizareProfil.css';
+
 function FinalizareProfil() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         nume: '',
         prenume: '',
         telefon: ''
     });
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+        }
+    }, [navigate]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -13,10 +24,35 @@ function FinalizareProfil() {
             [name]: value
         });
     };
-    const handleSubmit = (e) => {
-        e.preventDefault(); 
-        console.log("Date colectate:", formData);        
-        alert(`Profil finalizat pentru: ${formData.nume} ${formData.prenume}`);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('/api/Profil/finalizare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                alert(`Profil finalizat pentru: ${formData.nume} ${formData.prenume}`);
+                navigate('/acasa');
+            } else if (response.status === 401) {
+                alert("Sesiune expirată. Te rugăm să te loghezi din nou.");
+                localStorage.removeItem('token');
+                navigate('/login');
+            } else {
+                const errorText = await response.text();
+                alert("Eroare: " + errorText);
+            }
+        } catch (error) {
+            alert("Nu s-a putut contacta serverul.");
+        }
     };
 
     return (

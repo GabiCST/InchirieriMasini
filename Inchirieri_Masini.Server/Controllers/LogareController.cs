@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.OleDb;
-using BCrypt.Net;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.Versioning;
 
 [ApiController]
@@ -9,53 +12,65 @@ using System.Runtime.Versioning;
 public class LogareController : ControllerBase
 {
     private readonly string _connectionString;
+    private readonly IConfiguration _configuration;
 
     public LogareController(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("ServiceDb") ?? throw new InvalidOperationException("Connection string 'ServiceDb' not found.");
+        _configuration = configuration;
+        _connectionString = configuration.GetConnectionString("ServiceDb") ?? throw new InvalidOperationException("Connection string not found.");
     }
 
-[HttpPost("login")]
+    [HttpPost("login")]
 public IActionResult Login([FromBody] LoginRequest request)
 {
-    if (!ModelState.IsValid) return BadRequest(ModelState);
-
-    try
+    using (OleDbConnection connection = new OleDbConnection(_connectionString))
     {
-        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        connection.Open();
+        string sql = "SELECT ID, Username, Parola, Nume_Prenume, NumarTelefon FROM Users WHERE Username = ? OR Email = ?";
+        using (OleDbCommand cmd = new OleDbCommand(sql, connection))
         {
-            connection.Open();
-            string sql = "SELECT Username, Parola FROM Users WHERE Username = ? OR Email = ?";
+            cmd.Parameters.AddWithValue("?", request.Identificator);
+            cmd.Parameters.AddWithValue("?", request.Identificator);
 
-            using (OleDbCommand cmd = new OleDbCommand(sql, connection))
+            using (OleDbDataReader reader = cmd.ExecuteReader())
             {
-                cmd.Parameters.AddWithValue("?", request.Identificator);
-                cmd.Parameters.AddWithValue("?", request.Identificator);
-
-                using (OleDbDataReader reader = cmd.ExecuteReader())
+                if (reader.Read())
                 {
-                    if (reader.Read())
+                    string hash = reader["Parola"].ToString()!;
+                    if (BCrypt.Net.BCrypt.Verify(request.Password, hash))
                     {
-                        string hashDinBazaDeDate = reader["Parola"].ToString()!;
-                        string numeUtilizator = reader["Username"].ToString()!;
+                        var token = GenerareToken(reader["ID"].ToString()!, reader["Username"].ToString()!);
+                        
+                        bool esteProfilComplet = reader["Nume_Prenume"] != DBNull.Value && 
+                                               reader["NumarTelefon"] != DBNull.Value;
 
-                        if (BCrypt.Net.BCrypt.Verify(request.Password, hashDinBazaDeDate))
-                        {
-                            return Ok(new
-                            {
-                                mesaj = "Logare reușită!",
-                                utilizator = numeUtilizator
-                            });
-                        }
+                        return Ok(new { 
+                            token = token, 
+                            utilizator = reader["Username"].ToString(),
+                            profilComplet = esteProfilComplet 
+                        });
                     }
                 }
             }
         }
-        return Unauthorized("Date de logare incorecte!");
     }
-    catch (Exception ex)
+    return Unauthorized("Date de logare incorecte.");
+}
+private string GenerareToken(string id, string nume)
+{
+    var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+    var descriptor = new SecurityTokenDescriptor
     {
-        return StatusCode(500, $"Eroare la baza de date: {ex.Message}");
-    }
+        // "Claims" sunt bucăți de info salvate în token. Punem ID-ul aici ca să-l știm mai târziu.
+        Subject = new ClaimsIdentity(new[] { 
+            new Claim(ClaimTypes.NameIdentifier, id),
+            new Claim(ClaimTypes.Name, nume) 
+        }),
+        Expires = DateTime.UtcNow.AddDays(1), // Token-ul expiră într-o zi
+        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+    };
+    var handler = new JwtSecurityTokenHandler();
+    var token = handler.CreateToken(descriptor);
+    return handler.WriteToken(token);
 }
 }

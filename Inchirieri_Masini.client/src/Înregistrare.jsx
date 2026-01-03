@@ -1,19 +1,23 @@
 ﻿import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './ÎnregistrareLogare.css';
 
 function Register() {
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const togglePasswordVisibility = () => {
-        setPasswordVisible(!passwordVisible);
-    }
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const navigate = useNavigate();
+
+    const togglePasswordVisibility = () => {
+        setPasswordVisible(!passwordVisible);
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        localStorage.removeItem('token');
 
         if (password !== confirmPassword) {
             alert("Parolele nu coincid!");
@@ -36,7 +40,10 @@ function Register() {
             });
 
             if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
                 alert("Înregistrare reușită!");
+                navigate('/finalizare-profil');
             } else {
                 const errorText = await response.text();
                 alert("Eroare: " + errorText);
@@ -50,7 +57,7 @@ function Register() {
         <div className="register-container">
             <form className="register-form" onSubmit={handleSubmit}>
                 <label>
-                    Nume:
+                    User:
                     <input 
                         type="text" 
                         name="username" 
