@@ -18,33 +18,35 @@ public class MasiniController : ControllerBase
     }
 
     [HttpGet]
-public IActionResult GetMasini()
-{
-    var listaMasini = new List<Masina>();
-
-    using (OleDbConnection conn = new OleDbConnection(_connectionString))
+    public IActionResult GetMasini()
     {
-        conn.Open();
+        var listaMasini = new List<Masina>();
 
-        string sql = "SELECT ID_Autovehicul, Model, AnFabricatie, Numar_Inmatriculare, Tarif_Inchiriere, Poza, Motorizare FROM Autovehicule";
-
-        using (OleDbCommand cmd = new OleDbCommand(sql, conn))
-        using (OleDbDataReader reader = cmd.ExecuteReader())
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
         {
-            while (reader.Read())
+            conn.Open();
+
+            string sql = @"SELECT ID_Autovehicul, Model, AnFabricatie, Numar_Inmatriculare, Tarif_Inchiriere, Poza, Motorizare 
+                           FROM Autovehicule 
+                           WHERE ID_Autovehicul NOT IN (SELECT Id_Autovehicul FROM Contracte WHERE Status_Contract = 'Activ')";
+
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            using (OleDbDataReader reader = cmd.ExecuteReader())
             {
-                listaMasini.Add(new Masina {
-                    Id = Convert.ToInt32(reader["ID_Autovehicul"]),
-                    Model = reader["Model"]?.ToString() ?? "",
-                    An = Convert.ToInt32(reader["AnFabricatie"]),
-                    Numar_Inmatriculare = reader["Numar_Inmatriculare"]?.ToString() ?? "",
-                    Pret = Convert.ToInt32(reader["Tarif_Inchiriere"]),
-                    Img = reader["Poza"]?.ToString() ?? "",
-                    Motorizare = reader["Motorizare"]?.ToString() ?? ""
-                });
+                while (reader.Read())
+                {
+                    listaMasini.Add(new Masina {
+                        Id = Convert.ToInt32(reader["ID_Autovehicul"]),
+                        Model = reader["Model"]?.ToString() ?? "",
+                        An = Convert.ToInt32(reader["AnFabricatie"]),
+                        Numar_Inmatriculare = reader["Numar_Inmatriculare"]?.ToString() ?? "",
+                        Pret = Convert.ToInt32(reader["Tarif_Inchiriere"]),
+                        Img = reader["Poza"]?.ToString() ?? "",
+                        Motorizare = reader["Motorizare"]?.ToString() ?? ""
+                    });
+                }
             }
         }
+        return Ok(listaMasini);
     }
-    return Ok(listaMasini);
-}
 }

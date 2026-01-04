@@ -1,0 +1,212 @@
+.contracts-container {
+    padding: 40px;
+    background-color: #f4f7f6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.contracts-card {
+    background: white;
+    width: 100%;
+    max-width: 1000px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.contracts-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
+.contracts-header h1 {
+    margin: 10px 0 5px 0;
+    color: #333;
+    font-size: 2rem;
+}
+
+.contracts-header p {
+    color: #666;
+    margin: 0;
+}
+
+.back-btn-simple {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-weight: bold;
+    cursor: pointer;
+    align-self: flex-start;
+    padding: 0;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.back-btn-simple:hover { text-decoration: underline; }
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.contracts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.contracts-table th, .contracts-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.contracts-table th {
+    background-color: #f8f9fa;
+    color: #555;
+    font-weight: 700;
+}
+
+.fw-bold { font-weight: 700; color: #222; }
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.status-badge.activ { background-color: #e3f2fd; color: #1976d2; }
+.status-badge.rezervat { background-color: #fff3e0; color: #f57c00; }
+.status-badge.finalizat { background-color: #e8f5e9; color: #2e7d32; }
+
+.btn-details-small {
+    background-color: #f0f2f5;
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-details-small:hover {
+    background-color: #e2e6ea;
+    border-color: #ccc;
+}
+
+.loading-txt, .no-data {
+    text-align: center;
+    padding: 40px;
+    color: #777;
+    font-size: 1.1rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.contract-modal {
+    max-width: 500px;
+    width: 90%;
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header-custom {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-custom h3 { margin: 0; font-size: 1.2rem; }
+
+.close-x {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.contract-details-grid {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-group label {
+    color: #777;
+    font-weight: 500;
+}
+
+.detail-group .val {
+    font-weight: 700;
+    color: #333;
+}
+
+.detail-group.highlight {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.text-red { color: #d32f2f !important; }
+
+.divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 5px 0;
+}
+
+.modal-footer-custom {
+    padding: 15px 25px 25px;
+    text-align: right;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-close-modal {
+    padding: 10px 20px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-close-modal:hover { background-color: #5a6268; }

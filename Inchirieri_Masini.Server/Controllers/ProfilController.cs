@@ -18,55 +18,41 @@ public class ProfilController : ControllerBase
             ?? throw new InvalidOperationException("Connection string 'ServiceDb' not found.");
     }
     [HttpGet("detalii")]
-    public async Task<IActionResult> GetProfil()
+public async Task<IActionResult> GetProfil()
+{
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+    using (OleDbConnection connection = new OleDbConnection(_connectionString))
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        string sql = @"SELECT u.ID, u.Nume_Prenume, u.EsteAdmin, u.NumarTelefon, d.CI, d.Adresa, d.Serie_Carnet 
+                       FROM Users u 
+                       LEFT JOIN Detalii_User d ON u.ID = d.Id_User 
+                       WHERE u.ID = ?";
 
-        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        using (OleDbCommand command = new OleDbCommand(sql, connection))
         {
-            string sql = @"SELECT u.Nume_Prenume, u.NumarTelefon, d.CI, d.Adresa, d.Serie_Carnet, d.Data_expirare 
-                           FROM Users u 
-                           LEFT JOIN Detalii_User d ON u.ID = d.Id_User 
-                           WHERE u.ID = ?";
+            command.Parameters.AddWithValue("?", userId);
+            await connection.OpenAsync();
 
-            using (OleDbCommand command = new OleDbCommand(sql, connection))
+            using (OleDbDataReader reader = (OleDbDataReader)await command.ExecuteReaderAsync())
             {
-                command.Parameters.AddWithValue("?", userId);
-                await connection.OpenAsync();
-
-                using (OleDbDataReader reader = (OleDbDataReader)await command.ExecuteReaderAsync())
+                if (reader.Read())
                 {
-                    if (reader.Read())
-                    {
-                        string numeComplet = reader["Nume_Prenume"]?.ToString() ?? "";
-                        string nume = "";
-                        string prenume = "";
-
-                        if (!string.IsNullOrEmpty(numeComplet))
-                        {
-                            var parti = numeComplet.Split(' ', 2);
-                            nume = parti[0];
-                            prenume = parti.Length > 1 ? parti[1] : "";
-                        }
-
-                        return Ok(new {
-                        Nume = nume,
-                        Prenume = prenume,
-                        Telefon = reader["NumarTelefon"]?.ToString(),
-                        CI = reader["CI"]?.ToString(),
-                        Adresa = reader["Adresa"]?.ToString(),
-                        Serie_carnet = reader["Serie_Carnet"]?.ToString(),
-                        Data_expirare = reader["Data_expirare"] != DBNull.Value 
-                    ? Convert.ToDateTime(reader["Data_expirare"]).ToString("yyyy-MM-dd") 
-                    : null
-});
-                    }
+                    return Ok(new {
+                        id = reader["ID"],
+                        esteAdmin = Convert.ToBoolean(reader["EsteAdmin"]),
+                        numeComplet = reader["Nume_Prenume"]?.ToString(),
+                        ci = reader["CI"]?.ToString(),
+                        adresa = reader["Adresa"]?.ToString(),
+                        serie_carnet = reader["Serie_Carnet"]?.ToString()
+                    });
                 }
             }
         }
-        return NotFound();
     }
+    return NotFound();
+}
 
     [HttpPut("actualizare")]
     [HttpPost("salveaza")]

@@ -1,0 +1,110 @@
+.my-contracts-page {
+    background-color: #f4f7f6;
+    min-height: 100vh;
+}
+
+.contracts-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2.5rem;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.back-home-btn {
+    padding: 8px 16px;
+    border: 1px solid #007bff;
+    background: transparent;
+    color: #007bff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.contracts-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.contracts-grid-custom {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.contract-card-custom {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header-custom {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-pill.activ { background: #e3f2fd; color: #1976d2; }
+.status-pill.anulat { background: #ffebee; color: #d32f2f; }
+
+.price-bold {
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.date-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.date-item label {
+    display: block;
+    font-size: 0.7rem;
+    color: #777;
+    text-transform: uppercase;
+}
+
+.date-item span {
+    font-weight: 700;
+}
+
+.cancel-contract-btn {
+    margin-top: 20px;
+    padding: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.cancel-contract-btn:hover {
+    background: #a71d2a;
+}
+
+.empty-contracts {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.empty-icon { font-size: 4rem; display: block; }
