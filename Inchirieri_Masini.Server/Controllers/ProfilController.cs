@@ -51,16 +51,16 @@ public class ProfilController : ControllerBase
                         }
 
                         return Ok(new {
-                            Nume = nume,
-                            Prenume = prenume,
-                            Telefon = reader["NumarTelefon"]?.ToString(),
-                            CI = reader["CI"]?.ToString(),
-                            Adresa = reader["Adresa"]?.ToString(),
-                            Serie_carnet = reader["Serie_Carnet"]?.ToString(),
-                            Data_expirare = reader["Data_expirare"] != DBNull.Value 
-                                            ? Convert.ToDateTime(reader["Data_expirare"]) 
-                                            : (DateTime?)null
-                        });
+                        Nume = nume,
+                        Prenume = prenume,
+                        Telefon = reader["NumarTelefon"]?.ToString(),
+                        CI = reader["CI"]?.ToString(),
+                        Adresa = reader["Adresa"]?.ToString(),
+                        Serie_carnet = reader["Serie_Carnet"]?.ToString(),
+                        Data_expirare = reader["Data_expirare"] != DBNull.Value 
+                    ? Convert.ToDateTime(reader["Data_expirare"]).ToString("yyyy-MM-dd") 
+                    : null
+});
                     }
                 }
             }

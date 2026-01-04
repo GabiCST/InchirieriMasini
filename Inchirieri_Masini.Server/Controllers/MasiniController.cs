@@ -26,7 +26,7 @@ public IActionResult GetMasini()
     {
         conn.Open();
 
-        string sql = "SELECT ID_Autovehicul, Model, AnFabricatie, Numar_Matriculare, Tarif_Inchiriere, Poza, Motorizare FROM Autovehicule";
+        string sql = "SELECT ID_Autovehicul, Model, AnFabricatie, Numar_Inmatriculare, Tarif_Inchiriere, Poza, Motorizare FROM Autovehicule";
 
         using (OleDbCommand cmd = new OleDbCommand(sql, conn))
         using (OleDbDataReader reader = cmd.ExecuteReader())
@@ -37,8 +37,8 @@ public IActionResult GetMasini()
                     Id = Convert.ToInt32(reader["ID_Autovehicul"]),
                     Model = reader["Model"]?.ToString() ?? "",
                     An = Convert.ToInt32(reader["AnFabricatie"]),
-                    Numar_Inmatriculare = reader["Numar_Matriculare"]?.ToString() ?? "",
-                    Pret = Convert.ToDecimal(reader["Tarif_Inchiriere"]),
+                    Numar_Inmatriculare = reader["Numar_Inmatriculare"]?.ToString() ?? "",
+                    Pret = Convert.ToInt32(reader["Tarif_Inchiriere"]),
                     Img = reader["Poza"]?.ToString() ?? "",
                     Motorizare = reader["Motorizare"]?.ToString() ?? ""
                 });

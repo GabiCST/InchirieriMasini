@@ -30,6 +30,7 @@ function DatePersonale() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
+                            // În useEffect-ul unde faci fetch:
                 if (response.ok) {
                     const data = await response.json();
                     setFormData({
@@ -39,7 +40,8 @@ function DatePersonale() {
                         ci: data.ci || '',
                         adresa: data.adresa || '',
                         serieCarnet: data.serie_carnet || '',
-                        dataExpirare: data.data_expirare || ''
+                        // Asigură-te că folosești numele corect (data_expirare)
+                        dataExpirare: data.data_expirare || '' 
                     });
                 }
             } catch (error) {
@@ -152,7 +154,13 @@ function DatePersonale() {
                     </label>
                     <label>
                         Data Expirare
-                        <input type="date" name="dataExpirare" value={formData.dataExpirare} onChange={handleChange} required />
+                        <input 
+                            type="date" 
+                            name="dataExpirare" 
+                            value={formData.dataExpirare ? formData.dataExpirare.split('T')[0] : ''} 
+                            onChange={handleChange} 
+                            required 
+                        />
                     </label>
                 </div>
 
