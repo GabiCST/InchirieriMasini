@@ -35,11 +35,7 @@ function Logare() {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.utilizator);
-                if (data.profilComplet) {
-                    navigate('/acasa');
-                } else {
-                    navigate('/finalizare-profil');
-                }
+                navigate('/acasa');
             } else {
                 const errorText = await response.text();
                 alert("Eroare la logare: " + errorText);

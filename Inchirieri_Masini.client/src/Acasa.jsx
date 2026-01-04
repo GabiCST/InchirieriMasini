@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // 1. Am adaugat Link aici
+import { useNavigate, Link } from 'react-router-dom';
 import './Acasa.css';
 
 function Acasa() {
@@ -10,7 +10,6 @@ function Acasa() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     
-    // 2. State nou pentru meniul dropdown
     const [showMenu, setShowMenu] = useState(false);
 
     const carsPerPage = 6;
@@ -28,7 +27,6 @@ function Acasa() {
             if (storedUsername) setUsername(storedUsername);
 
             try {
-                // Asigura-te ca backend-ul ruleaza la aceasta adresa
                 const response = await fetch('/api/Masini', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -67,7 +65,6 @@ function Acasa() {
         window.scrollTo(0, 0);
     };
 
-    // Functia de Logout
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
@@ -79,8 +76,6 @@ function Acasa() {
         <div className="home-container">
             <nav className="navbar">
                 
-                {/* 3. Sectiunea de Profil modificata pentru Dropdown */}
-                {/* Am adaugat clasa user-profile-container si onClick */}
                 <div 
                     className="profile-section user-profile-container" 
                     onClick={() => setShowMenu(!showMenu)}
@@ -90,17 +85,14 @@ function Acasa() {
                         <span className="user-name">Salut, {username}! ▼</span>
                     </div>
 
-                    {/* MENIUL DROPDOWN (Apare doar cand showMenu e true) */}
                     {showMenu && (
                         <div className="dropdown-menu">
-                            {/* Link catre pagina de date personale */}
+                          
                             <Link to="/date-personale" className="dropdown-item">
                                 🖊 Completează date personale
                             </Link>
                             
                             <div className="dropdown-divider"></div>
-                            
-                            {/* Butonul de Deconectare mutat aici */}
                             <div className="dropdown-item logout-text" onClick={handleLogout}>
                                 Deconectare
                             </div>
@@ -117,13 +109,6 @@ function Acasa() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                
-                {/* Am scos butonul vechi de logout din dreapta pentru ca l-am pus in meniu.
-                    Daca vrei sa il pastrezi si acolo, poti decomenta liniile de mai jos: */}
-                {/* <div className="nav-actions">
-                    <button className="logout-btn" onClick={handleLogout}>Deconectare</button>
-                </div> 
-                */}
             </nav>
 
             <main className="main-content">
@@ -144,7 +129,6 @@ function Acasa() {
                                 </div>
                                 
                                 <div className="button-group">
-                                    {/* 4. Am actualizat butonul sa te duca la pagina masinii */}
                                     <button 
                                         className="detalii-btn" 
                                         onClick={() => navigate(`/masina/${masina.id}`)}

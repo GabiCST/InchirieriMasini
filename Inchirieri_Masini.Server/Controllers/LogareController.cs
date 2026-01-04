@@ -61,12 +61,11 @@ private string GenerareToken(string id, string nume)
     var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
     var descriptor = new SecurityTokenDescriptor
     {
-        // "Claims" sunt bucăți de info salvate în token. Punem ID-ul aici ca să-l știm mai târziu.
         Subject = new ClaimsIdentity(new[] { 
             new Claim(ClaimTypes.NameIdentifier, id),
             new Claim(ClaimTypes.Name, nume) 
         }),
-        Expires = DateTime.UtcNow.AddDays(1), // Token-ul expiră într-o zi
+        Expires = DateTime.UtcNow.AddDays(1),
         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
     };
     var handler = new JwtSecurityTokenHandler();
