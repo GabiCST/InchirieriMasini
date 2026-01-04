@@ -1,3 +1,4 @@
+/* --- RESETARE & GLOBALE --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -15,6 +16,7 @@ body {
     flex-direction: column;
 }
 
+/* --- NAVBAR --- */
 .navbar {
     background-color: white;
     height: 70px;
@@ -28,12 +30,27 @@ body {
     z-index: 100;
 }
 
-.profile-section {
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* --- PROFIL & DROPDOWN (User Menu) --- */
+.user-profile-container {
+    position: relative;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 12px;
-    position: relative;
+    gap: 10px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
     user-select: none;
+}
+
+.user-profile-container:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .avatar-circle {
@@ -60,35 +77,21 @@ body {
     color: #333;
 }
 
-.profile-dropdown {
+/* Meniul care apare la click */
+.dropdown-menu {
     position: absolute;
     top: 100%;
     left: 0;
     margin-top: 10px;
+    width: 220px;
     background-color: white;
-    min-width: 180px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     border-radius: 8px;
     padding: 8px 0;
     z-index: 1000;
     border: 1px solid #f0f0f0;
-    animation: fadeIn 0.2s ease;
-}
-
-.dropdown-item {
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.dropdown-item:hover {
-    background-color: #f5f7fa;
-    color: #007bff;
+    text-align: left;
+    animation: fadeIn 0.2s ease; /* Am reactivat animatia */
 }
 
 @keyframes fadeIn {
@@ -96,19 +99,45 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.nav-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+.dropdown-item {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    cursor: pointer;
 }
 
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 4px 0;
+}
+
+.logout-text {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.logout-text:hover {
+    background-color: #fff5f5;
+    color: #bd2130;
+}
+
+/* --- SEARCH BAR --- */
 .search-bar {
     width: 60%;
     padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 20px;
     outline: none;
-    transition: width 0.3s ease, border-color 0.3s ease; /* Animația */
+    transition: width 0.3s ease, border-color 0.3s ease;
 }
 
 .search-bar:focus {
@@ -116,22 +145,7 @@ body {
     border-color: #007bff;
 }
 
-.logout-btn {
-    border: 1px solid #dc3545;
-    color: #dc3545;
-    background: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.logout-btn:hover {
-    box-shadow: 0 0 0 1px #dc3545; 
-    background-color: #fff5f5;
-}
-
+/* --- CONȚINUT PRINCIPAL --- */
 .main-content {
     padding: 30px;
     max-width: 1200px;
@@ -147,6 +161,7 @@ body {
     padding-bottom: 5px;
 }
 
+/* --- GRID MAȘINI --- */
 .cars-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -224,22 +239,6 @@ body {
     padding-bottom: 2px;
 }
 
-.features-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 20px;
-}
-
-.feature-badge {
-    background-color: #eef2f7;
-    color: #4a5568;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-}
-
 .detalii-btn {
     margin-top: auto;
     width: 100%;
@@ -257,6 +256,7 @@ body {
     background-color: #0056b3;
 }
 
+/* --- PAGINARE --- */
 .pagination-container {
     display: flex;
     justify-content: center;

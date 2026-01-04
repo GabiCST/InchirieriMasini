@@ -44,7 +44,7 @@ function Register() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', username);
                 alert("Înregistrare reușită!");
-                navigate('/finalizare-profil');
+                navigate('/acasa');
             } else {
                 const errorText = await response.text();
                 alert("Eroare: " + errorText);
