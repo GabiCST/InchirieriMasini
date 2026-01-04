@@ -6,6 +6,9 @@ function DatePersonale() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
+    
+    // Verificăm dacă e admin din localStorage
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     const [formData, setFormData] = useState({
         nume: '',
@@ -26,13 +29,14 @@ function DatePersonale() {
             }
 
             try {
+                // Am corectat ruta sa fie cea din ProfilController-ul tau
                 const response = await fetch('/api/Profil/detalii', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                            // În useEffect-ul unde faci fetch:
                 if (response.ok) {
                     const data = await response.json();
+                    
                     setFormData({
                         nume: data.nume || '',
                         prenume: data.prenume || '',
@@ -40,12 +44,12 @@ function DatePersonale() {
                         ci: data.ci || '',
                         adresa: data.adresa || '',
                         serieCarnet: data.serie_carnet || '',
-                        // Asigură-te că folosești numele corect (data_expirare)
-                        dataExpirare: data.data_expirare || '' 
+                        // REPARATIE DATA: split('T')[0] asigura formatul yyyy-MM-dd cerut de input date
+                        dataExpirare: data.data_expirare ? data.data_expirare.split('T')[0] : ''
                     });
                 }
             } catch (error) {
-                console.error(error);
+                console.error("Eroare la incarcare", error);
                 setMessage("Eroare la încărcarea datelor.");
             } finally {
                 setLoading(false);
@@ -63,6 +67,7 @@ function DatePersonale() {
         e.preventDefault();
         const token = localStorage.getItem('token');
 
+        // Mapam datele exact cum le asteapta DatePersonaleRequest in C#
         const payload = {
             nume: formData.nume,
             prenume: formData.prenume,
@@ -74,6 +79,7 @@ function DatePersonale() {
         };
 
         try {
+            // Am corectat ruta sa fie cea din ProfilController-ul tau (salveaza)
             const response = await fetch('/api/Profil/salveaza', {
                 method: 'POST',
                 headers: {
@@ -84,29 +90,28 @@ function DatePersonale() {
             });
 
             if (response.ok) {
-                setMessage("Profilul a fost actualizat cu succes!");
+                setMessage("Datele au fost salvate cu succes!");
                 setTimeout(() => {
-                    setMessage(''); 
+                    setMessage('');
+                    // Redirectare dupa salvare (6 secunde conform cerintei anterioare)
                     navigate('/acasa');
-                }, 6000);
-            }
-            else {
-                const errorData = await response.json();
-                setMessage(errorData.message || "Eroare la salvare.");
+                }, 3000); 
+            } else {
+                setMessage("Eroare la salvare.");
             }
         } catch (error) {
-            setMessage("Eroare de conexiune la server.");
+            setMessage("Eroare de conexiune.");
         }
     };
 
-    if (loading) return <div className="loading-screen">Se încarcă...</div>;
+    if (loading) return <div className="register-container"><p>Se încarcă...</p></div>;
 
     return (
         <div className="register-container">
             <form className="register-form wide-form" onSubmit={handleSubmit}>
                 <div className="form-header">
-                    <h2>Profilul Tău</h2>
-                    <p>Gestionează informațiile necesare pentru închiriere.</p>
+                    <h2>{isAdmin ? 'Date Contact Admin' : 'Profilul Tău'}</h2>
+                    <p>{isAdmin ? 'Actualizează datele de contact publice.' : 'Completează datele pentru a putea închiria rapid.'}</p>
                 </div>
 
                 {message && (
@@ -116,9 +121,10 @@ function DatePersonale() {
                 )}
 
                 <h3 className="section-title">Informații Contact</h3>
+                
                 <div className="form-row">
                     <label>
-                        Nume de Familie
+                        Nume
                         <input type="text" name="nume" value={formData.nume} onChange={handleChange} required />
                     </label>
                     <label>
@@ -127,49 +133,54 @@ function DatePersonale() {
                     </label>
                 </div>
 
-                <label style={{marginTop: '10px'}}>
+                <label style={{marginTop: '15px'}}>
                     Număr Telefon
-                    <input type="tel" name="numarTelefon" value={formData.numarTelefon} onChange={handleChange} required />
+                    <input type="tel" name="numarTelefon" value={formData.numarTelefon} onChange={handleChange} placeholder="07xx xxx xxx" required />
                 </label>
 
-                <h3 className="section-title">Identitate & Adresă</h3>
-                <div className="form-row">
-                    <label>
-                        Serie & Nr. Buletin (CI)
-                        <input type="text" name="ci" value={formData.ci} onChange={handleChange} required />
-                    </label>
-                    <div></div> 
-                </div>
-                
-                <label>
-                    Adresa Completă
-                    <input type="text" name="adresa" className="full-width" value={formData.adresa} onChange={handleChange} required />
-                </label>
+                {!isAdmin && (
+                    <>
+                        <h3 className="section-title">Identitate & Adresă</h3>
+                        <div className="form-row">
+                            <label>
+                                Serie & Nr. Buletin (CI)
+                                <input type="text" name="ci" value={formData.ci} onChange={handleChange} required />
+                            </label>
+                            <div></div>
+                        </div>
+                        
+                        <label>
+                            Adresa Completă
+                            <input type="text" name="adresa" className="full-width" value={formData.adresa} onChange={handleChange} required />
+                        </label>
 
-                <h3 className="section-title">Permis de Conducere</h3>
-                <div className="form-row">
-                    <label>
-                        Serie Carnet
-                        <input type="text" name="serieCarnet" value={formData.serieCarnet} onChange={handleChange} required />
-                    </label>
-                    <label>
-                        Data Expirare
-                        <input 
-                            type="date" 
-                            name="dataExpirare" 
-                            value={formData.dataExpirare ? formData.dataExpirare.split('T')[0] : ''} 
-                            onChange={handleChange} 
-                            required 
-                        />
-                    </label>
-                </div>
+                        <h3 className="section-title">Permis de Conducere</h3>
+                        <div className="form-row">
+                            <label>
+                                Serie Carnet
+                                <input type="text" name="serieCarnet" value={formData.serieCarnet} onChange={handleChange} required />
+                            </label>
+
+                            <label>
+                                Data Expirare
+                                <input 
+                                    type="date" 
+                                    name="dataExpirare" 
+                                    value={formData.dataExpirare} 
+                                    onChange={handleChange} 
+                                    required 
+                                />
+                            </label>
+                        </div>
+                    </>
+                )}
 
                 <div className="button-group">
                     <button type="button" className="btn-secondary" onClick={() => navigate('/acasa')}>
-                        Înapoi
+                        Renunță
                     </button>
                     <button type="submit" className="btn-primary">
-                        Salvează Modificările
+                        Salvează
                     </button>
                 </div>
             </form>
