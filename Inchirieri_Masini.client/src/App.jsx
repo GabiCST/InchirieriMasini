@@ -1,21 +1,28 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Register from './Înregistrare'; 
+import CarDetails from './CarDetails';
+import Register from './Înregistrare'; // sau './Register' daca l-ai redenumit
 import Logare from './Logare';
-import FinalizareProfil from './FinalizareProfil';
 import Acasa from './Acasa';
+import DatePersonale from './DatePersonale'; // <--- 1. ASIGURA-TE CA AI LINIA ASTA
+
+// Daca ai si pagina de detalii masina, import-o si pe ea:
+// import CarDetails from './CarDetails'; 
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />        
+        {/* Redirecționare automată de la "/" la login */}
+        <Route path="/" element={<Navigate to="/login" />} />
         
-        <Route path="/login" element={<Logare />} />        
+        <Route path="/login" element={<Logare />} />
         <Route path="/register" element={<Register />} />
         
-        <Route path="/finalizare-profil" element={<FinalizareProfil />} />
+        {/* <--- 2. AICI ESTE LINIA CARE LIPSEȘTE */}
+        <Route path="/date-personale" element={<DatePersonale />} />
         
         <Route path="/acasa" element={<Acasa />} />
+        <Route path="/masina/:id" element={<CarDetails />} />
       </Routes>
     </BrowserRouter>
   );

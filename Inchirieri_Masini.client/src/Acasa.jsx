@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // 1. Am adaugat Link aici
 import './Acasa.css';
 
 function Acasa() {
@@ -9,6 +9,10 @@ function Acasa() {
     const [username, setUsername] = useState('Utilizator');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // 2. State nou pentru meniul dropdown
+    const [showMenu, setShowMenu] = useState(false);
+
     const carsPerPage = 6;
 
     useEffect(() => {
@@ -24,6 +28,7 @@ function Acasa() {
             if (storedUsername) setUsername(storedUsername);
 
             try {
+                // Asigura-te ca backend-ul ruleaza la aceasta adresa
                 const response = await fetch('/api/Masini', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -62,15 +67,47 @@ function Acasa() {
         window.scrollTo(0, 0);
     };
 
+    // Functia de Logout
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    };
+
     if (loading) return <div className="loading-container">Se încarcă mașinile...</div>;
 
     return (
         <div className="home-container">
             <nav className="navbar">
-                <div className="profile-section">
+                
+                {/* 3. Sectiunea de Profil modificata pentru Dropdown */}
+                {/* Am adaugat clasa user-profile-container si onClick */}
+                <div 
+                    className="profile-section user-profile-container" 
+                    onClick={() => setShowMenu(!showMenu)}
+                >
                     <div className="avatar-circle">{username.charAt(0).toUpperCase()}</div>
-                    <div className="user-info"><span className="user-name">Salut, {username}!</span></div>
+                    <div className="user-info">
+                        <span className="user-name">Salut, {username}! ▼</span>
+                    </div>
+
+                    {/* MENIUL DROPDOWN (Apare doar cand showMenu e true) */}
+                    {showMenu && (
+                        <div className="dropdown-menu">
+                            {/* Link catre pagina de date personale */}
+                            <Link to="/date-personale" className="dropdown-item">
+                                🖊 Completează date personale
+                            </Link>
+                            
+                            <div className="dropdown-divider"></div>
+                            
+                            {/* Butonul de Deconectare mutat aici */}
+                            <div className="dropdown-item logout-text" onClick={handleLogout}>
+                                Deconectare
+                            </div>
+                        </div>
+                    )}
                 </div>
+
                 <div className="nav-center">
                     <input 
                         type="text" 
@@ -80,14 +117,17 @@ function Acasa() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="nav-actions">
-                    <button className="logout-btn" onClick={() => { localStorage.clear(); navigate('/login'); }}>Deconectare</button>
-                </div>
+                
+                {/* Am scos butonul vechi de logout din dreapta pentru ca l-am pus in meniu.
+                    Daca vrei sa il pastrezi si acolo, poti decomenta liniile de mai jos: */}
+                {/* <div className="nav-actions">
+                    <button className="logout-btn" onClick={handleLogout}>Deconectare</button>
+                </div> 
+                */}
             </nav>
 
             <main className="main-content">
                 <h1>Mașini disponibile</h1>
-                
                 <div className="cars-grid">
                     {currentCars.map((masina) => (
                         <div key={masina.id} className="car-card">
@@ -104,7 +144,13 @@ function Acasa() {
                                 </div>
                                 
                                 <div className="button-group">
-                                    <button className="detalii-btn" onClick={() => alert(`Afiseaza detalii ${masina.model}`)}>Afiseaza detalii</button>
+                                    {/* 4. Am actualizat butonul sa te duca la pagina masinii */}
+                                    <button 
+                                        className="detalii-btn" 
+                                        onClick={() => navigate(`/masina/${masina.id}`)}
+                                    >
+                                        Afiseaza detalii
+                                    </button>
                                 </div>
                             </div>
                         </div>

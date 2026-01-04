@@ -1,0 +1,147 @@
+.details-container {
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.back-btn {
+    align-self: flex-start;
+    margin-bottom: 20px;
+    margin-left: max(0px, calc(50% - 500px)); /* Aliniere cu cardul */
+    background: none;
+    border: none;
+    color: #007bff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.details-card {
+    display: flex;
+    background: white;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    flex-wrap: wrap; /* Pentru mobil */
+}
+
+/* Stanga: Imaginea */
+.details-image-section {
+    flex: 1.2;
+    background-color: #eee;
+    min-width: 300px;
+}
+
+.main-car-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Dreapta: Info */
+.details-info-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.car-title {
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.car-price {
+    font-size: 2rem;
+    color: #007bff;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+.per-day {
+    font-size: 1rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.car-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.spec-box {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.spec-box .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.spec-box .value {
+    display: block;
+    font-weight: 700;
+    color: #333;
+}
+
+.car-description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.rent-btn {
+    width: 100%;
+    padding: 18px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rent-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.loading-center, .error-center {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .details-card {
+        flex-direction: column;
+    }
+    .details-image-section {
+        height: 250px;
+    }
+}
