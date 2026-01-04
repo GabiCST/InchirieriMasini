@@ -5,6 +5,10 @@ import './CarDetails.css';
 function CarDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+
+    // 1. VERIFICARE ADMIN (Adăugat)
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
     const [masina, setMasina] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,6 +17,7 @@ function CarDetails() {
     const [totalPrice, setTotalPrice] = useState(0);
     const today = new Date().toISOString().split('T')[0];
 
+    // --- LOGICA DE FETCH (Păstrată intactă din codul tău funcțional) ---
     useEffect(() => {
         const fetchDetalii = async () => {
             try {
@@ -31,6 +36,7 @@ function CarDetails() {
 
         fetchDetalii();
     }, [id]);
+
     const handleOpenModal = () => {
         setShowModal(true);
     };
@@ -39,6 +45,7 @@ function CarDetails() {
         setDates({ startDate: '', endDate: '' });
         setTotalPrice(0);
     };
+    
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         const newDates = { ...dates, [name]: value };
@@ -60,46 +67,46 @@ function CarDetails() {
             setTotalPrice(0);
         }
     };
+
     const submitContract = async () => {
-    // 1. Verificăm mai întâi dacă datele de închiriere sunt selectate în modal
-    if (!dates.startDate || !dates.endDate) {
-        alert("Te rugăm să selectezi perioada!");
-        return;
-    }
-
-    const token = localStorage.getItem('token');
-    
-    try {
-        const response = await fetch('/api/Profil/detalii', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-            const profil = await response.json();
-            const esteProfilIncomplet = !profil.ci || !profil.adresa || !profil.serie_carnet;
-
-            const dateRezervare = { 
-                state: { 
-                    carId: masina.id, 
-                    model: masina.model,
-                    startDate: dates.startDate,
-                    endDate: dates.endDate,
-                    totalPrice: totalPrice,
-                    pricePerDay: masina.pret
-                } 
-            };
-
-            if (esteProfilIncomplet) {
-                navigate('/date-personale', dateRezervare);
-            } else {
-                alert("Profilul este complet. Poți continua cu închirierea.");
-            }
+        if (!dates.startDate || !dates.endDate) {
+            alert("Te rugăm să selectezi perioada!");
+            return;
         }
-    } catch (error) {
-        console.error("Eroare la verificarea profilului:", error);
-        alert("A apărut o eroare. Te rugăm să încerci din nou.");
-    }
-};
+
+        const token = localStorage.getItem('token');
+        
+        try {
+            const response = await fetch('/api/Profil/detalii', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const profil = await response.json();
+                const esteProfilIncomplet = !profil.ci || !profil.adresa || !profil.serie_carnet;
+
+                const dateRezervare = { 
+                    state: { 
+                        carId: masina.id, 
+                        model: masina.model,
+                        startDate: dates.startDate,
+                        endDate: dates.endDate,
+                        totalPrice: totalPrice,
+                        pricePerDay: masina.pret
+                    } 
+                };
+
+                if (esteProfilIncomplet) {
+                    navigate('/date-personale', dateRezervare);
+                } else {
+                    alert("Profilul este complet. Poți continua cu închirierea.");
+                }
+            }
+        } catch (error) {
+            console.error("Eroare la verificarea profilului:", error);
+            alert("A apărut o eroare. Te rugăm să încerci din nou.");
+        }
+    };
 
     if (loading) return <div className="loading-screen">Se încarcă detaliile mașinii...</div>;
     if (error) return <div className="error-screen">Eroare: {error}</div>;
@@ -141,7 +148,24 @@ function CarDetails() {
                         </p>
 
                         <div className="action-area">
-                            <button className="rent-btn" onClick={handleOpenModal}>ÎNCHIRIAZĂ ACUM</button>
+                            {/* --- AICI ESTE MODIFICAREA --- */}
+                            {isAdmin ? (
+                                // Buton ADMIN: Merge la pagina de modificare
+                                <button 
+                                    className="rent-btn admin-modify-btn" 
+                                    // Adaugam un inline style pentru a-l face galben rapid, 
+                                    // sau se va lua din CSS daca ai adaugat clasa admin-modify-btn
+                                    style={{ backgroundColor: '#ffc107', color: '#212529', border: '1px solid #e0a800' }}
+                                    onClick={() => navigate(`/modifica-masina/${id}`)}
+                                >
+                                    ✏️ Modifică Datele Mașinii
+                                </button>
+                            ) : (
+                                // Buton USER: Deschide Modalul (Codul tau vechi)
+                                <button className="rent-btn" onClick={handleOpenModal}>
+                                    ÎNCHIRIAZĂ ACUM
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -178,6 +202,8 @@ function CarDetails() {
                     </div>
                 </div>
             </div>
+
+            {/* Modalul apare doar daca ShowModal e true (deci doar la User) */}
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -225,4 +251,5 @@ function CarDetails() {
         </div>
     );
 }
+
 export default CarDetails;
