@@ -6,7 +6,6 @@ function CarDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // 1. VERIFICARE ADMIN (Adăugat)
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     const [masina, setMasina] = useState(null);
@@ -17,7 +16,6 @@ function CarDetails() {
     const [totalPrice, setTotalPrice] = useState(0);
     const today = new Date().toISOString().split('T')[0];
 
-    // --- LOGICA DE FETCH (Păstrată intactă din codul tău funcțional) ---
     useEffect(() => {
         const fetchDetalii = async () => {
             try {
@@ -40,6 +38,7 @@ function CarDetails() {
     const handleOpenModal = () => {
         setShowModal(true);
     };
+
     const handleCloseModal = () => {
         setShowModal(false);
         setDates({ startDate: '', endDate: '' });
@@ -58,7 +57,6 @@ function CarDetails() {
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
             if (end >= start) {
                 const daysToPay = diffDays === 0 ? 1 : diffDays;
-                
                 setTotalPrice(daysToPay * masina.pret);
             } else {
                 setTotalPrice(0); 
@@ -77,12 +75,13 @@ function CarDetails() {
         const token = localStorage.getItem('token');
         
         try {
-            const response = await fetch('/api/Profil/detalii', {
+            const responseProfil = await fetch('/api/Profil/detalii', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (response.ok) {
-                const profil = await response.json();
+            if (responseProfil.ok) {
+                const profil = await responseProfil.json();
+                const idClientFinal = profil.userId || profil.id_Client || profil.id;
                 const esteProfilIncomplet = !profil.ci || !profil.adresa || !profil.serie_carnet;
 
                 const dateRezervare = { 
@@ -99,12 +98,37 @@ function CarDetails() {
                 if (esteProfilIncomplet) {
                     navigate('/date-personale', dateRezervare);
                 } else {
-                    alert("Profilul este complet. Poți continua cu închirierea.");
+                    const contractData = {
+                        ID_Client: idClientFinal, 
+                        Id_Autovehicul: parseInt(id),
+                        Data_Intocmiri: new Date().toISOString(),
+                        Data_Inchiriere: dates.startDate,
+                        Data_Returnare: dates.endDate,
+                        Status_Contract: "Activ",
+                        Suma_Totala_Estimata: totalPrice
+                    };
+
+                    const responseContract = await fetch('/api/Contracte', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(contractData)
+                    });
+
+                    if (responseContract.ok) {
+                        alert("Închiriere realizată cu succes!");
+                        navigate('/acasa'); 
+                    } else {
+                        const errorData = await responseContract.json();
+                        alert("Eroare la server: " + (errorData.message || "Eroare necunoscută"));
+                    }
                 }
             }
         } catch (error) {
-            console.error("Eroare la verificarea profilului:", error);
-            alert("A apărut o eroare. Te rugăm să încerci din nou.");
+            console.error("Eroare la procesarea închirierii:", error);
+            alert("A apărut o eroare tehnică.");
         }
     };
 
@@ -143,25 +167,18 @@ function CarDetails() {
                             </div>
                         </div>
 
-                        <p className="car-description">
-                            {masina.descriere}
-                        </p>
+                        <p className="car-description">{masina.descriere}</p>
 
                         <div className="action-area">
-                            {/* --- AICI ESTE MODIFICAREA --- */}
                             {isAdmin ? (
-                                // Buton ADMIN: Merge la pagina de modificare
                                 <button 
                                     className="rent-btn admin-modify-btn" 
-                                    // Adaugam un inline style pentru a-l face galben rapid, 
-                                    // sau se va lua din CSS daca ai adaugat clasa admin-modify-btn
                                     style={{ backgroundColor: '#ffc107', color: '#212529', border: '1px solid #e0a800' }}
                                     onClick={() => navigate(`/modifica-masina/${id}`)}
                                 >
                                     ✏️ Modifică Datele Mașinii
                                 </button>
                             ) : (
-                                // Buton USER: Deschide Modalul (Codul tau vechi)
                                 <button className="rent-btn" onClick={handleOpenModal}>
                                     ÎNCHIRIAZĂ ACUM
                                 </button>
@@ -171,7 +188,6 @@ function CarDetails() {
                 </div>
 
                 <h2 className="section-header">Informații Suplimentare</h2>
-                
                 <div className="info-grid">
                     <div className="info-card">
                         <h3>✨ Dotări și Facilități</h3>
@@ -182,9 +198,7 @@ function CarDetails() {
                                         <span className="check-icon">✓</span> {dotare}
                                     </div>
                                 ))
-                            ) : (
-                                <p>Nu sunt dotări specificate.</p>
-                            )}
+                            ) : <p>Nu sunt dotări specificate.</p>}
                         </div>
                     </div>
 
@@ -195,15 +209,12 @@ function CarDetails() {
                                 masina.conditii.map((cond, index) => (
                                     <li key={index}>{cond}</li>
                                 ))
-                            ) : (
-                                <p>Nu sunt condiții specifice.</p>
-                            )}
+                            ) : <p>Nu sunt condiții specifice.</p>}
                         </ul>
                     </div>
                 </div>
             </div>
 
-            {/* Modalul apare doar daca ShowModal e true (deci doar la User) */}
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">

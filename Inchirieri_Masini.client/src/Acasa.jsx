@@ -4,8 +4,7 @@ import './Acasa.css';
 
 function Acasa() {
     const navigate = useNavigate();
-    
-    // State-uri (păstrate din versiunea ta funcțională)
+
     const [masini, setMasini] = useState([]);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('Utilizator');
@@ -13,11 +12,9 @@ function Acasa() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showMenu, setShowMenu] = useState(false);
 
-    // Verificare Rol Admin
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const carsPerPage = 6;
 
-    // useEffect încărcare date
     useEffect(() => {
         const incarcaDate = async () => {
             const token = localStorage.getItem('token');
@@ -51,21 +48,19 @@ function Acasa() {
         incarcaDate();
     }, [navigate]);
 
-    // --- FUNCTIA NOUĂ: ȘTERGERE ---
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Sigur vrei să ștergi această mașină? Acțiunea este ireversibilă!");
         if (!confirmDelete) return;
 
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`/api/Masini/${id}`, {
+            const response = await fetch(`/api/AdminMasini/stergere/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
-                // Actualizăm lista locală scoțând mașina ștearsă (folosim masina.id conform codului tău)
-                setMasini(masini.filter(m => m.id !== id));
+                setMasini(masini.filter(m => (m.id || m.iD_Autovehicul || m.ID_Autovehicul) !== id));
                 alert("Mașina a fost ștearsă.");
             } else {
                 alert("Eroare la ștergere. Verifică dacă mașina are contracte active.");
@@ -76,18 +71,24 @@ function Acasa() {
         }
     };
 
-    // Filtrare & Paginare (Neschimbate)
+    const getValue = (obj, ...keys) => {
+        for (let key of keys) {
+            if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+        }
+        return '';
+    };
+
     useEffect(() => { setCurrentPage(1); }, [searchTerm]);
 
-    const masiniFiltrate = masini.filter((masina) =>
-        masina.model.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const masiniFiltrate = masini.filter((masina) => {
+        const model = getValue(masina, 'model', 'Model');
+        return model.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     const indexOfLastCar = currentPage * carsPerPage;
     const indexOfFirstCar = indexOfLastCar - carsPerPage;
     const currentCars = masiniFiltrate.slice(indexOfFirstCar, indexOfLastCar);
     const totalPages = Math.ceil(masiniFiltrate.length / carsPerPage);
-
     const changePage = (pageNumber) => { setCurrentPage(pageNumber); window.scrollTo(0, 0); };
     const handleLogout = () => { localStorage.clear(); navigate('/login'); };
 
@@ -121,57 +122,68 @@ function Acasa() {
             <main className="main-content">
                 <div className="header-actions">
                     <h1>{isAdmin ? 'Administrare Flotă' : 'Mașini disponibile'}</h1>
-                    {isAdmin && (
-                        <button className="add-car-btn" onClick={() => navigate('/adauga-masina')}>
-                            + Adaugă Autovehicul
-                        </button>
-                    )}
+    
+                    <div className="admin-header-buttons">
+                        {!isAdmin && (
+                            <button className="view-contracts-btn" onClick={() => navigate('/contractele-mele')}>
+                                📂 Contractele mele
+                            </button>
+                        )}
+
+                        {isAdmin && (
+                            <>
+                                <button className="view-contracts-btn" onClick={() => navigate('/admin-contracte')}>
+                                    📄 Vizualizare Contracte
+                                </button>
+                                <button className="add-car-btn" onClick={() => navigate('/adauga-masina')}>
+                                    + Adaugă Autovehicul
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 <div className="cars-grid">
-                    {currentCars.map((masina) => (
-                        <div key={masina.id} className="car-card">
-                            <div className="card-image">
-                                <img src={masina.img || 'https://via.placeholder.com/400x250'} alt={masina.model} />
-                                <span className="price-tag">{masina.pret}€ / zi</span>
-                            </div>
-                            <div className="card-details">
-                                <h3>{masina.model}</h3>
-                                <div className="specs-table">
-                                    <div className="spec-row"><span>Motorizare:</span> <strong>{masina.motorizare}</strong></div>
-                                    <div className="spec-row"><span>An:</span> <strong>{masina.an}</strong></div>
-                                    <div className="spec-row"><span>Nr:</span> <strong>{masina.numar_Inmatriculare}</strong></div>
-                                </div>
-                                
-                                <div className="button-group">
-                                    {isAdmin ? (
-                                        // --- AICI AM MODIFICAT: 3 Butoane pentru Admin ---
-                                        <div className="admin-actions-grid">
-                                            {/* 1. Buton Vizualizare (Ochi) */}
-                                            <button className="btn-icon btn-view" title="Vezi cum arată pagina" onClick={() => navigate(`/masina/${masina.id}`)}>
-                                                👁️
-                                            </button>
-                                            
-                                            {/* 2. Buton Modificare (Creion) */}
-                                            <button className="btn-icon btn-edit" title="Modifică datele" onClick={() => navigate(`/modifica-masina/${masina.id}`)}>
-                                                ✏️
-                                            </button>
+                    {currentCars.map((masina) => {
+                        const id = getValue(masina, 'id', 'iD_Autovehicul', 'ID_Autovehicul');
+                        const img = getValue(masina, 'img', 'poza', 'Poza');
+                        const model = getValue(masina, 'model', 'Model');
+                        const pret = getValue(masina, 'pret', 'tarif_Inchiriere', 'Tarif_Inchiriere');
+                        const motor = getValue(masina, 'motorizare', 'Motorizare');
+                        const an = getValue(masina, 'an', 'anFabricatie', 'AnFabricatie');
+                        const nr = getValue(masina, 'numar_Inmatriculare', 'numar_Matricula', 'Numar_Matricula');
 
-                                            {/* 3. Buton Ștergere (Gunoi) */}
-                                            <button className="btn-icon btn-delete" title="Șterge mașina" onClick={() => handleDelete(masina.id)}>
-                                                🗑️
+                        return (
+                            <div key={id} className="car-card">
+                                <div className="card-image">
+                                    <img src={img || 'https://via.placeholder.com/400x250'} alt={model} />
+                                    <span className="price-tag">{pret}€ / zi</span>
+                                </div>
+                                <div className="card-details">
+                                    <h3>{model}</h3>
+                                    <div className="specs-table">
+                                        <div className="spec-row"><span>Motorizare:</span> <strong>{motor}</strong></div>
+                                        <div className="spec-row"><span>An:</span> <strong>{an}</strong></div>
+                                        <div className="spec-row"><span>Nr:</span> <strong>{nr}</strong></div>
+                                    </div>
+                                    
+                                    <div className="button-group">
+                                        {isAdmin ? (
+                                            <div className="admin-actions-grid">
+                                                <button className="btn-icon btn-view" title="Vezi Detalii" onClick={() => navigate(`/masina/${id}`)}>👁️</button>
+                                                <button className="btn-icon btn-edit" title="Modifică" onClick={() => navigate(`/modifica-masina/${id}`)}>✏️</button>
+                                                <button className="btn-icon btn-delete" title="Șterge" onClick={() => handleDelete(id)}>🗑️</button>
+                                            </div>
+                                        ) : (
+                                            <button className="detalii-btn" onClick={() => navigate(`/masina/${id}`)}>
+                                                Afișează detalii
                                             </button>
-                                        </div>
-                                    ) : (
-                                        // --- Buton standard pentru User ---
-                                        <button className="detalii-btn" onClick={() => navigate(`/masina/${masina.id}`)}>
-                                            Afișează detalii
-                                        </button>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {masiniFiltrate.length === 0 && (

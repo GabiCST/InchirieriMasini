@@ -7,7 +7,6 @@ function DatePersonale() {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
     
-    // Verificăm dacă e admin din localStorage
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     const [formData, setFormData] = useState({
@@ -29,7 +28,6 @@ function DatePersonale() {
             }
 
             try {
-                // Am corectat ruta sa fie cea din ProfilController-ul tau
                 const response = await fetch('/api/Profil/detalii', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -44,7 +42,6 @@ function DatePersonale() {
                         ci: data.ci || '',
                         adresa: data.adresa || '',
                         serieCarnet: data.serie_carnet || '',
-                        // REPARATIE DATA: split('T')[0] asigura formatul yyyy-MM-dd cerut de input date
                         dataExpirare: data.data_expirare ? data.data_expirare.split('T')[0] : ''
                     });
                 }
@@ -67,7 +64,6 @@ function DatePersonale() {
         e.preventDefault();
         const token = localStorage.getItem('token');
 
-        // Mapam datele exact cum le asteapta DatePersonaleRequest in C#
         const payload = {
             nume: formData.nume,
             prenume: formData.prenume,
@@ -79,7 +75,6 @@ function DatePersonale() {
         };
 
         try {
-            // Am corectat ruta sa fie cea din ProfilController-ul tau (salveaza)
             const response = await fetch('/api/Profil/salveaza', {
                 method: 'POST',
                 headers: {
@@ -93,7 +88,6 @@ function DatePersonale() {
                 setMessage("Datele au fost salvate cu succes!");
                 setTimeout(() => {
                     setMessage('');
-                    // Redirectare dupa salvare (6 secunde conform cerintei anterioare)
                     navigate('/acasa');
                 }, 3000); 
             } else {

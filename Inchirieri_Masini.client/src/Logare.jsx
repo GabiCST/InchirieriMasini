@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './ÎnregistrareLogare.css';
 
@@ -16,6 +16,7 @@ function Logare() {
         e.preventDefault();
 
         localStorage.removeItem('token');
+        localStorage.removeItem('isAdmin');
 
         const loginData = {
             identificator: identificator, 
@@ -33,8 +34,11 @@ function Logare() {
 
             if (response.ok) {
                 const data = await response.json();
+                
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.utilizator);
+                localStorage.setItem('isAdmin', data.isAdmin.toString());
+                
                 navigate('/acasa');
             } else {
                 const errorText = await response.text();

@@ -1,21 +1,17 @@
-/* =========================================
-   1. LAYOUT GENERAL & CARD
-   ========================================= */
 .admin-container {
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #f0f2f5;
-    padding: 30px 15px; /* Padding sus/jos si lateral */
+    padding: 30px 15px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Cardul Principal */
 .admin-card {
     background: white;
     width: 100%;
-    max-width: 850px; /* Mai lat pentru a acomoda listele si grid-ul de 3 */
+    max-width: 850px;
     padding: 40px;
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
@@ -27,7 +23,6 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Header */
 .admin-header {
     text-align: center;
     margin-bottom: 35px;
@@ -39,17 +34,6 @@
     font-size: 1.8rem;
 }
 
-.admin-header p {
-    color: #7f8c8d;
-    font-size: 1rem;
-    margin: 0;
-}
-
-/* =========================================
-   2. ELEMENTE FORMULAR STANDARD
-   ========================================= */
-
-/* Titluri Secțiuni (liniile albastre) */
 .form-section-title {
     font-size: 0.95rem;
     text-transform: uppercase;
@@ -61,17 +45,15 @@
     font-weight: 700;
 }
 
-/* Input-uri & Label-uri */
 .admin-form label {
     display: flex;
     flex-direction: column;
     font-weight: 600;
     font-size: 0.9rem;
     color: #444;
-    margin-bottom: 0; /* Spatierea e gestionata de grid sau parinte */
 }
 
-.admin-form input {
+.admin-form input, .admin-form textarea {
     padding: 12px 15px;
     border: 1px solid #ced4da;
     border-radius: 8px;
@@ -81,13 +63,12 @@
     background-color: #fff;
 }
 
-.admin-form input:focus {
+.admin-form input:focus, .admin-form textarea:focus {
     border-color: #007bff;
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-/* Grid Systems */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -99,114 +80,33 @@
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-/* Preview Imagine */
-.img-preview {
-    margin-top: 15px;
-    text-align: center;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px dashed #dee2e6;
-}
-
-.img-preview img {
-    max-width: 100%;
-    max-height: 250px;
-    border-radius: 6px;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-/* Mesaj Eroare */
-.error-msg {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 12px;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 20px;
-    border: 1px solid #ffcdd2;
-}
-
-/* =========================================
-   3. LISTE DINAMICE (DOTĂRI & CONDIȚII) - NOU
-   ========================================= */
-
-.list-manager {
-    background-color: #f8f9fa; /* Fundal gri deschis */
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #e9ecef;
-}
-
-/* Rândul de input + buton */
-.input-group-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.input-group-row input {
-    flex: 1;
-    margin-top: 0; /* Anulam margin-ul standard de input */
-}
-
-.btn-add-item {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    width: 50px; /* Buton patrat */
-    border-radius: 8px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    line-height: 0;
-    padding-bottom: 4px; /* Ajustare vizuala a semnului + */
-}
-
-.btn-add-item:hover {
-    background-color: #0056b3;
-}
-
-/* Container Tag-uri */
 .tags-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    min-height: 40px; /* Sa nu colapseze daca e gol */
+    min-height: 40px;
+    align-items: center;
 }
 
-/* Tag Individual (Stil Implicit - Dotări) */
 .tag-item {
-    background-color: #e8f5e9; /* Verde deschis */
-    color: #2e7d32; /* Text verde inchis */
+    background-color: #e8f5e9;
+    color: #2e7d32;
     padding: 8px 14px;
-    border-radius: 25px; /* Forma de pill */
+    border-radius: 25px;
     font-size: 0.9rem;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
     border: 1px solid #c8e6c9;
-    transition: transform 0.1s;
 }
 
-.tag-item:hover {
-    transform: scale(1.02);
-}
-
-/* Tag Individual (Stil Condiții) */
-.tags-container.conditions-style .tag-item.condition {
-    background-color: #fff3e0; /* Portocaliu deschis */
-    color: #ef6c00; /* Text portocaliu */
+.conditions-style .tag-item {
+    background-color: #fff3e0;
+    color: #ef6c00;
     border-color: #ffe0b2;
 }
 
-/* Butonul de ștergere (X) */
 .btn-remove-tag {
     background: rgba(0,0,0,0.05);
     border: none;
@@ -220,25 +120,67 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
-    transition: all 0.2s;
 }
 
 .btn-remove-tag:hover {
-    background-color: #ffcdd2; /* Rosu deschis la hover */
+    background-color: #ffcdd2;
     color: #c62828;
 }
 
-.empty-tag-msg {
-    font-size: 0.9rem;
-    color: #adb5bd;
-    font-style: italic;
-    padding: 5px 0;
+.btn-inline-add {
+    background-color: #f8f9fa;
+    border: 2px dashed #ced4da;
+    color: #6c757d;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
 }
 
-/* =========================================
-   4. BUTOANE ACȚIUNE (JOS)
-   ========================================= */
+.btn-inline-add:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+    transform: rotate(90deg);
+}
+
+.inline-select {
+    padding: 8px 35px 8px 15px;
+    border-radius: 20px;
+    border: 2px solid #007bff;
+    background-color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2c3e50;
+    outline: none;
+    cursor: pointer;
+    animation: fadeIn 0.2s ease;
+    
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007bff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+}
+
+.inline-select::-ms-expand {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 .form-actions {
     display: flex;
     gap: 20px;
@@ -250,18 +192,17 @@
 .btn-cancel {
     flex: 1;
     padding: 15px;
-    border: 1px solid #ced4da;
-    background: #fff;
-    color: #495057;
+    border: none;
+    background: #dc3545;
+    color: white;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 1rem;
     cursor: pointer;
     transition: background 0.2s;
 }
 
 .btn-cancel:hover {
-    background: #f1f3f5;
+    background: #c82333;
 }
 
 .btn-save {
@@ -272,46 +213,29 @@
     color: white;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 1rem;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
     transition: all 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
 }
 
 .btn-save:hover {
     background: #218838;
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
 }
 
 .btn-save:disabled {
     background-color: #94d3a2;
     cursor: not-allowed;
-    transform: none;
 }
 
-/* =========================================
-   5. RESPONSIVE
-   ========================================= */
 @media (max-width: 768px) {
     .admin-card {
         padding: 25px;
     }
-
     .form-grid, .form-grid.three-cols {
-        grid-template-columns: 1fr; /* Totul devine o singura coloana */
-        gap: 15px;
+        grid-template-columns: 1fr;
     }
-    
     .form-actions {
-        flex-direction: column-reverse; /* Butonul save sus */
-    }
-    
-    .btn-save, .btn-cancel {
-        width: 100%;
+        flex-direction: column-reverse;
     }
 }

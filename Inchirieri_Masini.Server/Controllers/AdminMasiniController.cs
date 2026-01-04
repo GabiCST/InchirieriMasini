@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.OleDb;
 using System.Runtime.Versioning;
+using System.Security.Claims;
 
 [Authorize]
 [ApiController]
@@ -14,215 +15,272 @@ public class AdminMasiniController : ControllerBase
     public AdminMasiniController(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("ServiceDb") 
-            ?? throw new InvalidOperationException("Connection string 'ServiceDb' not found.");
+            ?? throw new InvalidOperationException("Connection string not found.");
+    }
+
+    [HttpGet("dotari-toate")]
+    public async Task<IActionResult> GetToateDotarile()
+    {
+        var list = new List<object>();
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            using (OleDbCommand cmd = new OleDbCommand("SELECT ID_Dotare, Dotare FROM Dotari", conn))
+            using (OleDbDataReader r = (OleDbDataReader)await cmd.ExecuteReaderAsync())
+            {
+                while (r.Read()) 
+                {
+                    list.Add(new { Id = r["ID_Dotare"], Nume = r["Dotare"]?.ToString() });
+                }
+            }
+        }
+        return Ok(list);
+    }
+
+    [HttpGet("conditii-toate")]
+    public async Task<IActionResult> GetToateConditiile()
+    {
+        var list = new List<object>();
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            using (OleDbCommand cmd = new OleDbCommand("SELECT ID_Conditie, Conditie FROM Conditii", conn))
+            using (OleDbDataReader r = (OleDbDataReader)await cmd.ExecuteReaderAsync())
+            {
+                while (r.Read()) 
+                {
+                    list.Add(new { Id = r["ID_Conditie"], Nume = r["Conditie"]?.ToString() });
+                }
+            }
+        }
+        return Ok(list);
+    }
+
+    [HttpGet("preluare/{id}")]
+    public async Task<IActionResult> GetMasinaEditare(int id)
+    {
+        Masina? masina = null;
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            using (OleDbCommand cmd = new OleDbCommand("SELECT * FROM Autovehicule WHERE ID_Autovehicul = ?", conn))
+            {
+                cmd.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader r = (OleDbDataReader)await cmd.ExecuteReaderAsync())
+                {
+                    if (r.Read())
+                    {
+                        masina = new Masina {
+                            Id = Convert.ToInt32(r["ID_Autovehicul"]),
+                            Model = r["Model"]?.ToString() ?? "",
+                            An = Convert.ToInt32(r["AnFabricatie"]),
+                            Numar_Inmatriculare = r["Numar_Inmatriculare"]?.ToString() ?? "",
+                            Pret = Convert.ToInt32(r["Tarif_Inchiriere"]),
+                            Img = r["Poza"]?.ToString() ?? "",
+                            Motorizare = r["Motorizare"]?.ToString() ?? "",
+                            Descriere = r["Descriere"]?.ToString() ?? ""
+                        };
+                    }
+                }
+            }
+
+            if (masina == null) return NotFound();
+
+            using (OleDbCommand cDot = new OleDbCommand("SELECT ID_Dotare FROM Autovehicul_dotari WHERE ID_Autovehicul = ?", conn))
+            {
+                cDot.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader r = (OleDbDataReader)await cDot.ExecuteReaderAsync())
+                {
+                    while (r.Read()) 
+                    {
+                        string idDot = r["ID_Dotare"]?.ToString() ?? "";
+                        if (!string.IsNullOrEmpty(idDot)) masina.Dotari.Add(idDot);
+                    }
+                }
+            }
+
+            using (OleDbCommand cCond = new OleDbCommand("SELECT ID_Conditie FROM Autovehicul_conditii WHERE ID_Autovehicul = ?", conn))
+            {
+                cCond.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader r = (OleDbDataReader)await cCond.ExecuteReaderAsync())
+                {
+                    while (r.Read()) 
+                    {
+                        string idCond = r["ID_Conditie"]?.ToString() ?? "";
+                        if (!string.IsNullOrEmpty(idCond)) masina.Conditii.Add(idCond);
+                    }
+                }
+            }
+        }
+        return Ok(masina);
     }
 
     [HttpPost("adaugare")]
-    public async Task<IActionResult> AdaugaMasina([FromBody] Masina request)
+    public async Task<IActionResult> AdaugaMasina([FromBody] Masina req)
     {
-        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
         {
-            await connection.OpenAsync();
-            using (OleDbTransaction transaction = connection.BeginTransaction())
+            await conn.OpenAsync();
+            using (OleDbTransaction tx = conn.BeginTransaction())
             {
                 try
                 {
-                    int newCarId = 0;
-                    string sqlMasina = @"INSERT INTO Autovehicule (Model, Numar_Inmatriculare, AnFabricatie, Tarif_Inchiriere, Poza, Motorizare, Descriere) 
-                                       VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-                    using (OleDbCommand cmd = new OleDbCommand(sqlMasina, connection, transaction))
+                    int carId = 0;
+                    string sql = "INSERT INTO Autovehicule (Model, Numar_Inmatriculare, AnFabricatie, Tarif_Inchiriere, Poza, Motorizare, Descriere) VALUES (?,?,?,?,?,?,?)";
+                    using (OleDbCommand cmd = new OleDbCommand(sql, conn, tx))
                     {
-                        cmd.Parameters.AddWithValue("?", request.Model);
-                        cmd.Parameters.AddWithValue("?", request.Numar_Inmatriculare);
-                        cmd.Parameters.AddWithValue("?", request.An);
-                        cmd.Parameters.AddWithValue("?", request.Pret);
-                        cmd.Parameters.AddWithValue("?", request.Img);
-                        cmd.Parameters.AddWithValue("?", request.Motorizare);
-                        cmd.Parameters.AddWithValue("?", request.Descriere);
-
+                        cmd.Parameters.AddWithValue("?", req.Model);
+                        cmd.Parameters.AddWithValue("?", req.Numar_Inmatriculare);
+                        cmd.Parameters.AddWithValue("?", req.An);
+                        cmd.Parameters.AddWithValue("?", req.Pret);
+                        cmd.Parameters.AddWithValue("?", req.Img);
+                        cmd.Parameters.AddWithValue("?", req.Motorizare);
+                        cmd.Parameters.AddWithValue("?", req.Descriere);
                         await cmd.ExecuteNonQueryAsync();
 
                         cmd.CommandText = "SELECT @@IDENTITY";
-                       var result = await cmd.ExecuteScalarAsync();
-                       newCarId = result != null && result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                        var resId = await cmd.ExecuteScalarAsync();
+                        carId = resId != null ? Convert.ToInt32(resId) : 0;
                     }
 
-                    if (request.Dotari != null && request.Dotari.Count > 0)
+                    foreach (var d in req.Dotari)
                     {
-                        foreach (var dotareIdStr in request.Dotari)
+                        using (OleDbCommand cmdD = new OleDbCommand("INSERT INTO Autovehicul_dotari (ID_Autovehicul, ID_Dotare) VALUES (?,?)", conn, tx))
                         {
-                            if (int.TryParse(dotareIdStr, out int dotareId))
-                            {
-                                string sqlDotari = "INSERT INTO Autovehicul_dotari (ID_Autovehicul, ID_Dotare) VALUES (?, ?)";
-                                using (OleDbCommand cmdDot = new OleDbCommand(sqlDotari, connection, transaction))
-                                {
-                                    cmdDot.Parameters.AddWithValue("?", newCarId);
-                                    cmdDot.Parameters.AddWithValue("?", dotareId);
-                                    await cmdDot.ExecuteNonQueryAsync();
-                                }
-                            }
+                            cmdD.Parameters.AddWithValue("?", carId);
+                            cmdD.Parameters.AddWithValue("?", int.Parse(d));
+                            await cmdD.ExecuteNonQueryAsync();
                         }
                     }
 
-                    if (request.Conditii != null && request.Conditii.Count > 0)
+                    foreach (var c in req.Conditii)
                     {
-                        foreach (var conditieIdStr in request.Conditii)
+                        using (OleDbCommand cmdC = new OleDbCommand("INSERT INTO Autovehicul_conditii (ID_Autovehicul, ID_Conditie) VALUES (?,?)", conn, tx))
                         {
-                            if (int.TryParse(conditieIdStr, out int conditieId))
-                            {
-                                string sqlConditii = "INSERT INTO Autovehicul_conditii (ID_Autovehicul, ID_Conditie) VALUES (?, ?)";
-                                using (OleDbCommand cmdCond = new OleDbCommand(sqlConditii, connection, transaction))
-                                {
-                                    cmdCond.Parameters.AddWithValue("?", newCarId);
-                                    cmdCond.Parameters.AddWithValue("?", conditieId);
-                                    await cmdCond.ExecuteNonQueryAsync();
-                                }
-                            }
+                            cmdC.Parameters.AddWithValue("?", carId);
+                            cmdC.Parameters.AddWithValue("?", int.Parse(c));
+                            await cmdC.ExecuteNonQueryAsync();
                         }
                     }
 
-                    transaction.Commit();
-                    return Ok(new { message = "Autovehicul adăugat cu succes!", id = newCarId });
+                    tx.Commit();
+                    return Ok(new { id = carId });
+                }
+                catch
+                {
+                    tx.Rollback();
+                    throw;
+                }
+            }
+        }
+    }
+
+    [HttpPut("modificare/{id}")]
+    public async Task<IActionResult> ModificaMasina(int id, [FromBody] Masina req)
+    {
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            using (OleDbTransaction tx = conn.BeginTransaction())
+            {
+                try
+                {
+                    string sql = "UPDATE Autovehicule SET Model=?, Numar_Inmatriculare=?, AnFabricatie=?, Tarif_Inchiriere=?, Poza=?, Motorizare=?, Descriere=? WHERE ID_Autovehicul=?";
+                    using (OleDbCommand cmd = new OleDbCommand(sql, conn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("?", req.Model);
+                        cmd.Parameters.AddWithValue("?", req.Numar_Inmatriculare);
+                        cmd.Parameters.AddWithValue("?", req.An);
+                        cmd.Parameters.AddWithValue("?", req.Pret);
+                        cmd.Parameters.AddWithValue("?", req.Img);
+                        cmd.Parameters.AddWithValue("?", req.Motorizare);
+                        cmd.Parameters.AddWithValue("?", req.Descriere);
+                        cmd.Parameters.AddWithValue("?", id);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+
+                    await SincronizeazaRelatii(conn, tx, id, "Autovehicul_dotari", "ID_Dotare", req.Dotari);
+                    await SincronizeazaRelatii(conn, tx, id, "Autovehicul_conditii", "ID_Conditie", req.Conditii);
+
+                    tx.Commit();
+                    return Ok();
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
+                    tx.Rollback();
                     return StatusCode(500, $"Eroare la salvare: {ex.Message}");
                 }
             }
         }
     }
-    [HttpGet("preluare/{id}")]
-    public async Task<IActionResult> GetMasinaEditare(int id)
-    {
-        Masina? masina = null; 
 
-        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+    private async Task SincronizeazaRelatii(OleDbConnection conn, OleDbTransaction tx, int masinaId, string tabel, string coloanaId, List<string> elementeNoi)
+    {
+        List<string> existente = new List<string>();
+        string sqlSelect = $"SELECT {coloanaId} FROM {tabel} WHERE ID_Autovehicul = ?";
+        
+        using (OleDbCommand cmd = new OleDbCommand(sqlSelect, conn, tx))
         {
-            await connection.OpenAsync();
-            
-            string sqlMasina = "SELECT * FROM Autovehicule WHERE ID_Autovehicul = ?";
-            using (OleDbCommand cmd = new OleDbCommand(sqlMasina, connection))
+            cmd.Parameters.AddWithValue("?", masinaId);
+            using (var r = await cmd.ExecuteReaderAsync())
             {
-                cmd.Parameters.AddWithValue("?", id);
-                using (OleDbDataReader reader = (OleDbDataReader)await cmd.ExecuteReaderAsync())
+                while (r.Read())
                 {
-                    if (reader.Read())
+                    string? val = r[0]?.ToString();
+                    if (val != null)
                     {
-                        masina = new Masina
-                        {
-                            Id = Convert.ToInt32(reader["ID_Autovehicul"]),
-                            Model = reader["Model"]?.ToString() ?? "",
-                            An = Convert.ToInt32(reader["AnFabricatie"]),
-                            Numar_Inmatriculare = reader["Numar_Inmatriculare"]?.ToString() ?? "",
-                            Pret = Convert.ToInt32(reader["Tarif_Inchiriere"]),
-                            Img = reader["Poza"]?.ToString() ?? "",
-                            Motorizare = reader["Motorizare"]?.ToString() ?? "",
-                            Descriere = reader["Descriere"]?.ToString() ?? ""
-                        };
-                    }
-                }
-            }
-            if (masina == null) return NotFound();
-            string sqlDotari = "SELECT ID_Dotare FROM Autovehicul_dotari WHERE ID_Autovehicul = ?";
-            using (OleDbCommand cmdDot = new OleDbCommand(sqlDotari, connection))
-            {
-                cmdDot.Parameters.AddWithValue("?", id);
-                using (OleDbDataReader reader = (OleDbDataReader)await cmdDot.ExecuteReaderAsync())
-                {
-                    while (reader.Read()) 
-                    {
-                        string dotareId = reader["ID_Dotare"]?.ToString() ?? "";
-                        if (!string.IsNullOrEmpty(dotareId)) masina.Dotari.Add(dotareId);
-                    }
-                }
-            }
-            string sqlConditii = "SELECT ID_Conditie FROM Autovehicul_conditii WHERE ID_Autovehicul = ?";
-            using (OleDbCommand cmdCond = new OleDbCommand(sqlConditii, connection))
-            {
-                cmdCond.Parameters.AddWithValue("?", id);
-                using (OleDbDataReader reader = (OleDbDataReader)await cmdCond.ExecuteReaderAsync())
-                {
-                    while (reader.Read()) 
-                    {
-                        string conditieId = reader["ID_Conditie"]?.ToString() ?? "";
-                        if (!string.IsNullOrEmpty(conditieId)) masina.Conditii.Add(conditieId);
+                        existente.Add(val);
                     }
                 }
             }
         }
-
-        return Ok(masina);
+        var deSters = existente.Except(elementeNoi).ToList();
+        foreach (var idElem in deSters)
+        {
+            string sqlDelete = $"DELETE FROM {tabel} WHERE ID_Autovehicul = ? AND {coloanaId} = ?";
+            using (OleDbCommand cmd = new OleDbCommand(sqlDelete, conn, tx))
+            {
+                cmd.Parameters.AddWithValue("?", masinaId);
+                cmd.Parameters.AddWithValue("?", int.Parse(idElem));
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        var deAdaugat = elementeNoi.Except(existente).ToList();
+        foreach (var idElem in deAdaugat)
+        {
+            string sqlInsert = $"INSERT INTO {tabel} (ID_Autovehicul, {coloanaId}) VALUES (?, ?)";
+            using (OleDbCommand cmd = new OleDbCommand(sqlInsert, conn, tx))
+            {
+                cmd.Parameters.AddWithValue("?", masinaId);
+                cmd.Parameters.AddWithValue("?", int.Parse(idElem));
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
     }
-
-    [HttpPut("modificare/{id}")]
-    public async Task<IActionResult> ModificaMasina(int id, [FromBody] Masina request)
+    [HttpDelete("stergere/{id}")]
+public async Task<IActionResult> StergeMasina(int id)
+{
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    
+    using (OleDbConnection conn = new OleDbConnection(_connectionString))
     {
-        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        await conn.OpenAsync();
+        string sqlCheck = "SELECT EsteAdmin FROM Users WHERE ID = ?";
+        using (OleDbCommand cmdCheck = new OleDbCommand(sqlCheck, conn))
         {
-            await connection.OpenAsync();
-            using (OleDbTransaction transaction = connection.BeginTransaction())
-            {
-                try
-                {
-                    string sqlUpdate = @"UPDATE Autovehicule SET Model=?, Numar_Inmatriculare=?, AnFabricatie=?, 
-                                    Tarif_Inchiriere=?, Poza=?, Motorizare=?, Descriere=? WHERE ID_Autovehicul=?";
-                    
-                    using (OleDbCommand cmd = new OleDbCommand(sqlUpdate, connection, transaction))
-                    {
-                        cmd.Parameters.AddWithValue("?", request.Model);
-                        cmd.Parameters.AddWithValue("?", request.Numar_Inmatriculare);
-                        cmd.Parameters.AddWithValue("?", request.An);
-                        cmd.Parameters.AddWithValue("?", request.Pret);
-                        cmd.Parameters.AddWithValue("?", request.Img);
-                        cmd.Parameters.AddWithValue("?", request.Motorizare);
-                        cmd.Parameters.AddWithValue("?", request.Descriere);
-                        cmd.Parameters.AddWithValue("?", id);
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-
-                    using (OleDbCommand delDot = new OleDbCommand("DELETE FROM Autovehicul_dotari WHERE ID_Autovehicul=?", connection, transaction))
-                    {
-                        delDot.Parameters.AddWithValue("?", id);
-                        await delDot.ExecuteNonQueryAsync();
-                    }
-
-                    foreach (var dotId in request.Dotari)
-                    {
-                        using (OleDbCommand insDot = new OleDbCommand("INSERT INTO Autovehicul_dotari (ID_Autovehicul, ID_Dotare) VALUES (?,?)", connection, transaction))
-                        {
-                            insDot.Parameters.AddWithValue("?", id);
-                            insDot.Parameters.AddWithValue("?", int.Parse(dotId));
-                            await insDot.ExecuteNonQueryAsync();
-                        }
-                    }
-
-                    using (OleDbCommand delCond = new OleDbCommand("DELETE FROM Autovehicul_conditii WHERE ID_Autovehicul=?", connection, transaction))
-                    {
-                        delCond.Parameters.AddWithValue("?", id);
-                        await delCond.ExecuteNonQueryAsync();
-                    }
-
-                    foreach (var condId in request.Conditii)
-                    {
-                        using (OleDbCommand insCond = new OleDbCommand("INSERT INTO Autovehicul_conditii (ID_Autovehicul, ID_Conditie) VALUES (?,?)", connection, transaction))
-                        {
-                            insCond.Parameters.AddWithValue("?", id);
-                            insCond.Parameters.AddWithValue("?", int.Parse(condId));
-                            await insCond.ExecuteNonQueryAsync();
-                        }
-                    }
-
-                    transaction.Commit();
-                    return Ok(new { message = "Datele au fost actualizate!" });
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    return StatusCode(500, ex.Message);
-                }
-            }
+            cmdCheck.Parameters.AddWithValue("?", userId);
+            bool isAdmin = Convert.ToBoolean(await cmdCheck.ExecuteScalarAsync() ?? false);
+            
+            if (!isAdmin) return Forbid();
         }
+
+        string sqlDelete = "DELETE FROM Autovehicule WHERE ID_Autovehicul = ?";
+        using (OleDbCommand cmdDel = new OleDbCommand(sqlDelete, conn))
+        {
+            cmdDel.Parameters.AddWithValue("?", id);
+            await cmdDel.ExecuteNonQueryAsync();
+        }
+    }
+    return Ok();
     }
 }
