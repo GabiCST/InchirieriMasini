@@ -33,8 +33,6 @@ public IActionResult Register([FromBody] RegisterRequest request)
         using (OleDbConnection connection = new OleDbConnection(_connectionString))
         {
             connection.Open();
-
-            // 1. Verificăm dacă există deja utilizatorul
             string checkSql = "SELECT COUNT(*) FROM Users WHERE Email = ? OR Username = ?";
             using (OleDbCommand checkCmd = new OleDbCommand(checkSql, connection))
             {
@@ -43,8 +41,6 @@ public IActionResult Register([FromBody] RegisterRequest request)
                 int count = Convert.ToInt32(checkCmd.ExecuteScalar());
                 if (count > 0) return BadRequest("Email sau Username deja folosite.");
             }
-
-            // 2. Inserăm noul utilizator
             string insertSql = "INSERT INTO Users (Username, Email, Parola, DataCreare) VALUES (?, ?, ?, ?)";
             using (OleDbCommand insertCmd = new OleDbCommand(insertSql, connection))
             {
@@ -54,15 +50,11 @@ public IActionResult Register([FromBody] RegisterRequest request)
                 insertCmd.Parameters.AddWithValue("?", dataCreare);
                 insertCmd.ExecuteNonQuery();
             }
-
-            // 3. AFLĂM ID-ul generat (@@IDENTITY pentru Access)
             int noulId;
             using (OleDbCommand idCmd = new OleDbCommand("SELECT @@IDENTITY", connection))
             {
                 noulId = (int)idCmd.ExecuteScalar()!;
             }
-
-            // 4. GENERĂM TOKEN-UL (folosind ID-ul aflat)
             var token = GenerareToken(noulId.ToString(), request.Username);
 
             return Ok(new 

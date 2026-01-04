@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import './CarDetails.css'; // Vom crea stilul imediat
+import './CarDetails.css';
 
 function CarDetails() {
-    const { id } = useParams(); // Luam ID-ul din URL (ex: 1, 5, 20)
+    const { id } = useParams();
     const navigate = useNavigate();
     
     const [masina, setMasina] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // 1. Incarcam datele reale din baza de date cand se deschide pagina
     useEffect(() => {
         const fetchMasina = async () => {
             const token = localStorage.getItem('token');
@@ -20,7 +18,6 @@ function CarDetails() {
             }
 
             try {
-                // Presupunem ca ai endpoint-ul GET /api/Masini/{id}
                 const response = await fetch(`/api/Masini/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -40,18 +37,12 @@ function CarDetails() {
 
         fetchMasina();
     }, [id, navigate]);
-
-    // 2. Logica de Inchiriere (Verificare profil)
     const handleInchiriere = async () => {
         const token = localStorage.getItem('token');
-        
         try {
-            // Verificam daca userul are datele personale completate
             const response = await fetch('/api/User/GetDetalii', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            // Daca nu are detalii (404 sau 204), il trimitem sa le completeze
             if (response.status === 404 || response.status === 204) {
                 alert("⚠ Nu poți închiria fără datele din buletin/permis! Te redirecționăm...");
                 navigate('/date-personale');
@@ -64,10 +55,7 @@ function CarDetails() {
                  navigate('/date-personale');
                  return;
             }
-
-            // Daca totul e ok:
             alert(`Cerere de închiriere trimisă pentru ${masina.model}! (Aici vei lega API-ul de Contracte)`);
-            // Aici ai face POST catre /api/Contracte
 
         } catch (error) {
             console.error("Eroare verificare user:", error);
@@ -84,7 +72,6 @@ function CarDetails() {
             <button className="back-btn" onClick={() => navigate('/acasa')}>&larr; Înapoi la listă</button>
             
             <div className="details-card">
-                {/* Partea Stanga: Imaginea */}
                 <div className="details-image-section">
                     <img 
                         src={masina.img || masina.poza || 'https://via.placeholder.com/600x400'} 
@@ -92,8 +79,6 @@ function CarDetails() {
                         className="main-car-image"
                     />
                 </div>
-
-                {/* Partea Dreapta: Informatii */}
                 <div className="details-info-section">
                     <h1 className="car-title">{masina.model}</h1>
                     <div className="car-price">
@@ -114,8 +99,6 @@ function CarDetails() {
                             <span className="value">{masina.numar_Inmatriculare || masina.numar_Matricula}</span>
                         </div>
                     </div>
-
-                    {/* Descriere (daca ai in baza, altfel un text generic) */}
                     <p className="car-description">
                         Această mașină este disponibilă imediat. Beneficiezi de asigurare inclusă, 
                         asistență rutieră 24/7 și km nelimitați. Perfectă pentru drumurile tale!

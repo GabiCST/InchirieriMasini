@@ -1,12 +1,9 @@
-/* =========================================
-   1. STILURI DE BAZĂ (PENTRU LOGIN & REGISTER)
-   ========================================= */
 .register-container {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f2f5; /* Fundalul gri al paginii */
+    background-color: #f0f2f5;
 }
 
 .register-form {
@@ -15,7 +12,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 400px; /* Latimea standard pentru Login/Register */
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -59,7 +56,6 @@
     background-color: #0056b3;
 }
 
-/* Stiluri pentru iconita de parola (ochi) */
 .password-input-wrapper {
     position: relative;
     width: 100%;
@@ -82,11 +78,6 @@
     align-items: center;
 }
 
-/* =========================================
-   2. STILURI NOI PENTRU DATE PERSONALE (DESIGN MODERN)
-   ========================================= */
-
-/* Facem formularul un pic mai lat pentru a incapea 2 coloane */
 .register-form.wide-form {
     max-width: 600px; 
 }
@@ -106,7 +97,6 @@
     font-size: 0.9rem;
 }
 
-/* Titlurile mici dintre sectiuni */
 .section-title {
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -117,19 +107,16 @@
     letter-spacing: 1px;
 }
 
-/* GRILA: Asta pune input-urile unul langa altul */
 .form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Doua coloane egale */
-    gap: 20px; /* Spatiu intre ele */
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-/* Input care ocupa toata latimea (pentru Adresa) */
 .full-width {
     width: 100%;
 }
 
-/* Pe telefon, revenim la o singura coloana */
 @media (max-width: 500px) {
     .form-row {
         grid-template-columns: 1fr;
@@ -137,7 +124,6 @@
     }
 }
 
-/* Mesajele de eroare/succes */
 .status-message {
     padding: 12px;
     border-radius: 6px;
@@ -158,14 +144,12 @@
     border: 1px solid #c8e6c9;
 }
 
-/* Butoanele de jos (Grupate) */
 .button-group {
     display: flex;
     gap: 15px;
     margin-top: 30px;
 }
 
-/* Suprascriem stilul standard de buton pentru a avea variante */
 .btn-primary {
     flex: 2;
     background-color: #007bff;
@@ -192,7 +176,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
-    margin-top: 0; /* Resetam margin-ul de la stilul de baza */
+    margin-top: 0;
 }
 
 .btn-secondary:hover {
