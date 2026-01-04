@@ -60,22 +60,46 @@ function CarDetails() {
             setTotalPrice(0);
         }
     };
-    const submitContract = () => {
-        if (!dates.startDate || !dates.endDate) {
-            alert("Te rugăm să selectezi perioada!");
-            return;
-        }
-        navigate('/date-personale', { 
-            state: { 
-                carId: masina.id, 
-                model: masina.model,
-                startDate: dates.startDate,
-                endDate: dates.endDate,
-                totalPrice: totalPrice,
-                pricePerDay: masina.pret
-            } 
+    const submitContract = async () => {
+    // 1. Verificăm mai întâi dacă datele de închiriere sunt selectate în modal
+    if (!dates.startDate || !dates.endDate) {
+        alert("Te rugăm să selectezi perioada!");
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch('/api/Profil/detalii', {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    };
+
+        if (response.ok) {
+            const profil = await response.json();
+            const esteProfilIncomplet = !profil.ci || !profil.adresa || !profil.serie_carnet;
+
+            const dateRezervare = { 
+                state: { 
+                    carId: masina.id, 
+                    model: masina.model,
+                    startDate: dates.startDate,
+                    endDate: dates.endDate,
+                    totalPrice: totalPrice,
+                    pricePerDay: masina.pret
+                } 
+            };
+
+            if (esteProfilIncomplet) {
+                navigate('/date-personale', dateRezervare);
+            } else {
+                alert("Profilul este complet. Poți continua cu închirierea.");
+            }
+        }
+    } catch (error) {
+        console.error("Eroare la verificarea profilului:", error);
+        alert("A apărut o eroare. Te rugăm să încerci din nou.");
+    }
+};
 
     if (loading) return <div className="loading-screen">Se încarcă detaliile mașinii...</div>;
     if (error) return <div className="error-screen">Eroare: {error}</div>;
