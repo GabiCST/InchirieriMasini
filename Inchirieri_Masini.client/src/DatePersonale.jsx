@@ -27,7 +27,6 @@ function DatePersonale() {
                 return;
             }
 
-            // Alegem endpoint-ul corect în funcție de rol
             const endpoint = isAdmin ? '/api/ProfilAdmin/detalii' : '/api/ProfilUser/detalii';
 
             try {
@@ -42,7 +41,6 @@ function DatePersonale() {
                         nume: data.nume || '',
                         prenume: data.prenume || '',
                         numarTelefon: data.telefon || '',
-                        // Câmpurile de mai jos vor fi goale/null pentru admin, ceea ce este ok
                         ci: data.ci || '',
                         adresa: data.adresa || '',
                         serieCarnet: data.serie_carnet || '',
@@ -100,7 +98,6 @@ function DatePersonale() {
                     setTimeout(() => navigate('/acasa'), 2000); 
                 } else {
                     const error = await response.json();
-                    // Dacă primești 403, înseamnă că token-ul nu corespunde rolului de admin din DB
                     setMessage(response.status === 403 ? "Eroare: Nu aveți drepturi de admin." : "Eroare la salvare.");
                 }
             } catch (error) {

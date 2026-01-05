@@ -42,7 +42,6 @@ public async Task<IActionResult> GetAdminsContact()
 
                 adminContacts.Add(new DatePersonaleProfileRequest
                 {
-                    // Asigură-te că aceste nume de proprietăți sunt cele așteptate de React
                     Nume = parti.Length > 0 ? parti[0] : "",
                     Prenume = parti.Length > 1 ? parti[1] : "",
                     Telefon = r["NumarTelefon"].ToString() ?? ""
