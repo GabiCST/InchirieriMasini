@@ -9,4 +9,5 @@ public class Masina {
     public string Descriere { get; set; } = null!;
     public List<string> Dotari { get; set; } = new List<string>();
     public List<string> Conditii { get; set; } = new List<string>();
+    public List<EvenimentRequest> Evenimente { get; set; } = new List<EvenimentRequest>();
 }

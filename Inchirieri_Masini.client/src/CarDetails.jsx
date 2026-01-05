@@ -5,7 +5,6 @@ import './CarDetails.css';
 function CarDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     const [masina, setMasina] = useState(null);
@@ -52,7 +51,6 @@ function CarDetails() {
         if (newDates.startDate && newDates.endDate) {
             const start = new Date(newDates.startDate);
             const end = new Date(newDates.endDate);
-            
             const diffTime = Math.abs(end - start);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
             if (end >= start) {
@@ -73,7 +71,6 @@ function CarDetails() {
         }
 
         const token = localStorage.getItem('token');
-        
         try {
             const responseProfil = await fetch('/api/Profil/detalii', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -99,13 +96,13 @@ function CarDetails() {
                     navigate('/date-personale', dateRezervare);
                 } else {
                     const contractData = {
-                        ID_Client: idClientFinal, 
-                        Id_Autovehicul: parseInt(id),
-                        Data_Intocmiri: new Date().toISOString(),
-                        Data_Inchiriere: dates.startDate,
-                        Data_Returnare: dates.endDate,
-                        Status_Contract: "Activ",
-                        Suma_Totala_Estimata: totalPrice
+                        id_Client: idClientFinal, 
+                        id_Autovehicul: parseInt(id),
+                        data_Intocmiri: new Date().toISOString(),
+                        data_Inchiriere: dates.startDate,
+                        data_Returnare: dates.endDate,
+                        status_Contract: "Activ",
+                        suma_Totala_Estimata: totalPrice
                     };
 
                     const responseContract = await fetch('/api/Contracte', {
@@ -173,7 +170,6 @@ function CarDetails() {
                             {isAdmin ? (
                                 <button 
                                     className="rent-btn admin-modify-btn" 
-                                    style={{ backgroundColor: '#ffc107', color: '#212529', border: '1px solid #e0a800' }}
                                     onClick={() => navigate(`/modifica-masina/${id}`)}
                                 >
                                     ✏️ Modifică Datele Mașinii
@@ -212,6 +208,27 @@ function CarDetails() {
                             ) : <p>Nu sunt condiții specifice.</p>}
                         </ul>
                     </div>
+
+                    <div className="info-card wide-card">
+                        <h3>🚗 Istoric Evenimente Rutiere</h3>
+                        <div className="events-container">
+                            {masina.evenimente && masina.evenimente.length > 0 ? (
+                                masina.evenimente.map((ev, index) => (
+                                    <div key={index} className="event-row">
+                                        <div className="event-main">
+                                            <span className="event-badge">{ev.tip}</span>
+                                            <span className="event-date">{new Date(ev.data).toLocaleDateString('ro-RO')}</span>
+                                            <span className="event-location">📍 {ev.locatie}</span>
+                                        </div>
+                                        <p className="event-desc">{ev.descriere}</p>
+                                        <div className="event-footer">
+                                            Cost reparație: <span className="event-cost">{ev.cost}€</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : <p className="no-data">Niciun eveniment rutier înregistrat pentru acest autovehicul.</p>}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -220,7 +237,6 @@ function CarDetails() {
                     <div className="modal-content">
                         <h3>Configurează Închirierea</h3>
                         <p>Alege perioada dorită pentru <strong>{masina.model}</strong></p>
-                        
                         <div className="date-inputs">
                             <label>
                                 Data Preluare:
@@ -246,12 +262,10 @@ function CarDetails() {
                                 />
                             </label>
                         </div>
-
                         <div className="price-summary">
                             <p>Preț pe zi: <strong>{masina.pret}€</strong></p>
                             <p className="total-highlight">Total estimat: {totalPrice}€</p>
                         </div>
-
                         <div className="modal-actions">
                             <button className="btn-cancel" onClick={handleCloseModal}>Anulează</button>
                             <button className="btn-confirm" onClick={submitContract}>Confirmă & Închiriază</button>

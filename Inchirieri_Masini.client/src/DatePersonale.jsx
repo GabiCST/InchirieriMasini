@@ -27,8 +27,11 @@ function DatePersonale() {
                 return;
             }
 
+            // Alegem endpoint-ul corect în funcție de rol
+            const endpoint = isAdmin ? '/api/ProfilAdmin/detalii' : '/api/ProfilUser/detalii';
+
             try {
-                const response = await fetch('/api/Profil/detalii', {
+                const response = await fetch(endpoint, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -39,10 +42,11 @@ function DatePersonale() {
                         nume: data.nume || '',
                         prenume: data.prenume || '',
                         numarTelefon: data.telefon || '',
+                        // Câmpurile de mai jos vor fi goale/null pentru admin, ceea ce este ok
                         ci: data.ci || '',
                         adresa: data.adresa || '',
                         serieCarnet: data.serie_carnet || '',
-                        dataExpirare: data.data_expirare ? data.data_expirare.split('T')[0] : ''
+                        dataExpirare: data.data_expirare || ''
                     });
                 }
             } catch (error) {
@@ -54,49 +58,55 @@ function DatePersonale() {
         };
 
         fetchUserData();
-    }, [navigate]);
+    }, [navigate, isAdmin]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const endpoint = isAdmin ? '/api/ProfilAdmin/salveaza' : '/api/ProfilUser/salveaza';
 
-        const payload = {
-            nume: formData.nume,
-            prenume: formData.prenume,
-            telefon: formData.numarTelefon,
-            ci: formData.ci,
-            adresa: formData.adresa,
-            serie_carnet: formData.serieCarnet,
-            data_expirare: formData.dataExpirare
-        };
+            const payload = isAdmin 
+                ? {
+                    nume: formData.nume,
+                    prenume: formData.prenume,
+                    telefon: formData.numarTelefon
+                }
+                : {
+                    nume: formData.nume,
+                    prenume: formData.prenume,
+                    telefon: formData.numarTelefon,
+                    ci: formData.ci,
+                    adresa: formData.adresa,
+                    serie_carnet: formData.serieCarnet,
+                    data_expirare: formData.dataExpirare || null
+                };
 
-        try {
-            const response = await fetch('/api/Profil/salveaza', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            if (response.ok) {
-                setMessage("Datele au fost salvate cu succes!");
-                setTimeout(() => {
-                    setMessage('');
-                    navigate('/acasa');
-                }, 3000); 
-            } else {
-                setMessage("Eroare la salvare.");
+                if (response.ok) {
+                    setMessage("Datele au fost salvate cu succes!");
+                    setTimeout(() => navigate('/acasa'), 2000); 
+                } else {
+                    const error = await response.json();
+                    // Dacă primești 403, înseamnă că token-ul nu corespunde rolului de admin din DB
+                    setMessage(response.status === 403 ? "Eroare: Nu aveți drepturi de admin." : "Eroare la salvare.");
+                }
+            } catch (error) {
+                setMessage("Eroare de conexiune la server.");
             }
-        } catch (error) {
-            setMessage("Eroare de conexiune.");
-        }
-    };
+        };
 
     if (loading) return <div className="register-container"><p>Se încarcă...</p></div>;
 

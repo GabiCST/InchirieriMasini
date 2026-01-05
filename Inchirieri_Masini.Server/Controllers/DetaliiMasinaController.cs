@@ -26,7 +26,9 @@ public class DetaliiMasinaController : ControllerBase
 
         using (OleDbConnection connection = new OleDbConnection(_connectionString))
         {
-           string sql = @"
+            await connection.OpenAsync();
+
+            string sqlMasina = @"
                 SELECT a.ID_Autovehicul, a.Model, a.Numar_Inmatriculare, a.AnFabricatie, 
                     a.Tarif_Inchiriere, a.Poza, a.Motorizare, a.Descriere,
                     d.Dotare, c.Conditie
@@ -37,12 +39,10 @@ public class DetaliiMasinaController : ControllerBase
                 LEFT JOIN Conditii AS c ON ac.ID_Conditie = c.ID_Conditie
                 WHERE a.ID_Autovehicul = ?";
 
-            using (OleDbCommand command = new OleDbCommand(sql, connection))
+            using (OleDbCommand cmd = new OleDbCommand(sqlMasina, connection))
             {
-                command.Parameters.AddWithValue("?", id);
-                await connection.OpenAsync();
-
-                using (OleDbDataReader reader = (OleDbDataReader)await command.ExecuteReaderAsync())
+                cmd.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader reader = (OleDbDataReader)await cmd.ExecuteReaderAsync())
                 {
                     bool dateMasinaSetate = false;
                     while (reader.Read())
@@ -61,14 +61,30 @@ public class DetaliiMasinaController : ControllerBase
                         }
                         string? dotare = reader["Dotare"]?.ToString();
                         if (!string.IsNullOrEmpty(dotare) && !masina.Dotari.Contains(dotare))
-                        {
                             masina.Dotari.Add(dotare);
-                        }
+
                         string? conditie = reader["Conditie"]?.ToString();
                         if (!string.IsNullOrEmpty(conditie) && !masina.Conditii.Contains(conditie))
-                        {
                             masina.Conditii.Add(conditie);
-                        }
+                    }
+                }
+            }
+
+            string sqlEvenimente = "SELECT Tip, Data_Eveniment, Locatie, Descriere, Costul_Reparatiei FROM Evenimente_Rutiere WHERE Id_autovehicul = ?";
+            using (OleDbCommand cmdEv = new OleDbCommand(sqlEvenimente, connection))
+            {
+                cmdEv.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader readerEv = (OleDbDataReader)await cmdEv.ExecuteReaderAsync())
+                {
+                    while (readerEv.Read())
+                    {
+                        masina.Evenimente.Add(new EvenimentRequest {
+                            Tip = readerEv["Tip"]?.ToString() ?? "Nespecificat",
+                            Data_Eveniment = readerEv["Data_Eveniment"] != DBNull.Value ? Convert.ToDateTime(readerEv["Data_Eveniment"]) : DateTime.MinValue,
+                            Locatie = readerEv["Locatie"]?.ToString() ?? "",
+                            Descriere = readerEv["Descriere"]?.ToString() ?? "",
+                            Costul_Reparatiei = readerEv["Costul_Reparatiei"] != DBNull.Value ? Convert.ToInt32(readerEv["Costul_Reparatiei"]) : 0
+                        });
                     }
                 }
             }

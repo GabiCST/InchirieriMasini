@@ -11,6 +11,9 @@ function Acasa() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [showMenu, setShowMenu] = useState(false);
+    
+    const [showContacts, setShowContacts] = useState(false);
+    const [admins, setAdmins] = useState([]);
 
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const carsPerPage = 6;
@@ -47,6 +50,30 @@ function Acasa() {
 
         incarcaDate();
     }, [navigate]);
+
+    const fetchAdmins = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/api/Contacte/admins', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setAdmins(data);
+            } else {
+                console.error("Nu s-au putut prelua administratorii.");
+            }
+        } catch (error) {
+            console.error("Eroare server contacte:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (showContacts) {
+            fetchAdmins();
+        }
+    }, [showContacts]);
 
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Sigur vrei să ștergi această mașină? Acțiunea este ireversibilă!");
@@ -117,6 +144,10 @@ function Acasa() {
                 <div className="nav-center">
                     <input type="text" placeholder="Caută după model..." className="search-bar" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
                 </div>
+
+                <button className="contact-btn-nav" onClick={() => setShowContacts(true)}>
+                    📞 Contacte
+                </button>
             </nav>
 
             <main className="main-content">
@@ -200,6 +231,40 @@ function Acasa() {
                     </div>
                 )}
             </main>
+
+            {showContacts && (
+                <div className="modal-overlay" onClick={() => setShowContacts(false)}>
+                    <div className="modal-content contact-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header-custom">
+                            <h3>📞 Contacte Administratori</h3>
+                            <button className="close-x" onClick={() => setShowContacts(false)}>×</button>
+                        </div>
+                        <div className="modal-body contacts-list">
+                        <p className="info-text">Pentru asistență, contactați un administrator disponibil:</p>
+                        
+                        {admins.length > 0 ? (
+                            admins.map((admin, index) => (
+                                <div key={index} className="contact-item">
+                                    <div className="contact-avatar">
+                                        {admin.nume ? admin.nume.charAt(0).toUpperCase() : 'A'}
+                                    </div>
+                                    <div className="contact-info">
+                                        <span className="contact-name">
+                                            {admin.nume} {admin.prenume}
+                                        </span>
+                                        <a href={`tel:${admin.telefon}`} className="contact-phone">
+                                            {admin.telefon || "Fără număr"}
+                                        </a>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p style={{textAlign: 'center', color: '#888'}}>Nu s-au găsit administratori.</p>
+                        )}
+                    </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
