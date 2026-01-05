@@ -17,6 +17,28 @@
     z-index: 100;
 }
 
+/* BUTON NOU CONTACTE NAVIGARE */
+.contact-btn-nav {
+    margin-left: 20px;
+    padding: 10px 20px;
+    background-color: #28a745; /* Verde pentru a se distinge */
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.contact-btn-nav:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
 .nav-center {
     flex: 1;
     display: flex;
@@ -380,9 +402,127 @@ h1 {
     border-color: #007bff;
 }
 
+/* =========================================
+   STILURI MODAL CONTACTE (NOI)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(3px);
+}
+
+.contact-modal {
+    background: white;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header-custom {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-custom h3 { margin: 0; font-size: 1.2rem; color: #333; }
+.close-x { background: none; border: none; font-size: 1.8rem; line-height: 1; color: #aaa; cursor: pointer; }
+.close-x:hover { color: #333; }
+
+.contacts-list {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    transition: transform 0.2s;
+}
+
+.contact-item:hover {
+    transform: translateX(5px);
+    border-color: #007bff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.contact-avatar {
+    font-size: 1.5rem;
+    background: #e3f2fd;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.contact-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.contact-phone {
+    font-size: 0.9rem;
+    color: #666;
+    text-decoration: none;
+    margin-top: 2px;
+}
+
+.btn-call {
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.info-text {
+    text-align: center;
+    color: #777;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
 @media (max-width: 850px) {
     .navbar { flex-direction: column; gap: 20px; }
     .search-bar { max-width: 100%; }
+    /* Pe mobil butonul de contacte sa fie lat */
+    .contact-btn-nav { margin-left: 0; width: 100%; }
     .header-actions { flex-direction: column; gap: 20px; align-items: stretch; }
     .admin-header-buttons { flex-direction: column; }
     .cars-grid { grid-template-columns: 1fr; }

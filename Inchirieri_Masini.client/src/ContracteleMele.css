@@ -1,110 +1,266 @@
 .my-contracts-page {
     background-color: #f4f7f6;
     min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-bottom: 40px;
 }
-
 .contracts-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2.5rem;
+    padding: 1.2rem 3rem;
     background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
+.contracts-nav h1 {
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 800;
+    margin: 0;
+}
+
+.nav-placeholder { width: 120px; } 
+
 .back-home-btn {
-    padding: 8px 16px;
-    border: 1px solid #007bff;
-    background: transparent;
-    color: #007bff;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border: none;
+    background: #f8f9fa;
+    color: #555;
+    border-radius: 30px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-home-btn:hover {
+    background: #e9ecef;
+    color: #333;
+    transform: translateX(-3px);
 }
 
 .contracts-content {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
 
 .contracts-grid-custom {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 30px;
 }
 
 .contract-card-custom {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid white;
+    position: relative;
+    overflow: hidden;
+}
+
+.contract-card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    border-color: #f0f0f0;
 }
 
 .card-header-custom {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 15px;
     align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .status-pill {
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: bold;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
 }
 
-.status-pill.activ { background: #e3f2fd; color: #1976d2; }
-.status-pill.anulat { background: #ffebee; color: #d32f2f; }
+.status-pill.activ {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.status-pill.acceptat {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.status-pill.predat {
+    background-color: #e0f7fa;
+    color: #006064;
+    border: 1px solid #b2ebf2;
+}
+
+.status-pill.finalizat {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.status-pill.anulat {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
 
 .price-bold {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 800;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
+
+.card-body-custom h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.3rem;
+    color: #222;
+}
+
+.plate-text {
+    color: #777;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.plate-text strong {
+    color: #444;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
 }
 
 .date-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     background: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 15px;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.date-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-item:last-child {
+    align-items: flex-end; 
+    text-align: right;
 }
 
 .date-item label {
-    display: block;
     font-size: 0.7rem;
-    color: #777;
+    color: #888;
     text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
 }
 
 .date-item span {
     font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
 }
 
 .cancel-contract-btn {
     margin-top: 20px;
-    padding: 10px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 6px;
+    padding: 12px;
+    background: white;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    width: 100%;
 }
 
 .cancel-contract-btn:hover {
-    background: #a71d2a;
+    background: #dc3545;
+    color: white;
+}
+
+.loading-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: #666;
+    background: #f4f7f6;
 }
 
 .empty-contracts {
     text-align: center;
-    margin-top: 100px;
+    margin-top: 80px;
+    background: white;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
 }
 
-.empty-icon { font-size: 4rem; display: block; }
+.empty-icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.empty-contracts h2 {
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.btn-explore {
+    padding: 12px 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+    transition: transform 0.2s;
+}
+
+.btn-explore:hover {
+    transform: translateY(-2px);
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .contracts-nav {
+        padding: 1rem;
+    }
+    .nav-placeholder { display: none; }
+    .contracts-nav h1 { font-size: 1.2rem; }
+    .contracts-grid-custom { grid-template-columns: 1fr; }
+}

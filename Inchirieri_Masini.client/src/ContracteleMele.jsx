@@ -39,10 +39,10 @@ function ContracteleMele() {
             });
 
             if (response.ok) {
-                alert("Contract anulat cu succes.");
-                fetchContracte(); // Reîncărcăm lista
+                alert("✅ Contract anulat cu succes.");
+                fetchContracte(); 
             } else {
-                alert("Eroare la anulare.");
+                alert("❌ Eroare la anulare. Încercați din nou.");
             }
         } catch (error) {
             console.error(error);
@@ -55,9 +55,9 @@ function ContracteleMele() {
         <div className="my-contracts-page">
             <nav className="contracts-nav">
                 <button className="back-home-btn" onClick={() => navigate('/acasa')}>
-                    &larr; Înapoi la Acasă
+                    &larr; Înapoi
                 </button>
-                <h1>Istoricul Închirierilor Mele</h1>
+                <h1>Istoricul închirierilor mele</h1>
                 <div className="nav-placeholder"></div>
             </nav>
 
@@ -67,15 +67,15 @@ function ContracteleMele() {
                         {contracte.map((c) => (
                             <div key={c.id_Contract} className="contract-card-custom">
                                 <div className="card-header-custom">
-                                    <span className={`status-pill ${c.status_Contract.toLowerCase()}`}>
+                                    <span className={`status-pill ${c.status_Contract ? c.status_Contract.toLowerCase() : ''}`}>
                                         {c.status_Contract}
                                     </span>
                                     <span className="price-bold">{c.suma_Totala_Estimata} €</span>
                                 </div>
 
                                 <div className="card-body-custom">
-                                    <h3>{c.modelMasina}</h3>
-                                    <p className="plate-text">Număr: <strong>{c.numarMasina}</strong></p>
+                                    <h3>{c.modelMasina || "Model Necunoscut"}</h3>
+                                    <p className="plate-text">Număr: <strong>{c.numarMasina || "---"}</strong></p>
                                     
                                     <div className="date-info-grid">
                                         <div className="date-item">
@@ -88,10 +88,9 @@ function ContracteleMele() {
                                         </div>
                                     </div>
                                 </div>
-
                                 {c.status_Contract === 'Activ' && (
                                     <button className="cancel-contract-btn" onClick={() => handleAnulare(c.id_Contract)}>
-                                        Anulează Închirierea
+                                        Anulează Rezervarea
                                     </button>
                                 )}
                             </div>

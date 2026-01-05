@@ -27,9 +27,12 @@ public class MasiniController : ControllerBase
             conn.Open();
 
             string sql = @"SELECT ID_Autovehicul, Model, AnFabricatie, Numar_Inmatriculare, Tarif_Inchiriere, Poza, Motorizare 
-                           FROM Autovehicule 
-                           WHERE ID_Autovehicul NOT IN (SELECT Id_Autovehicul FROM Contracte WHERE Status_Contract = 'Activ')";
-
+               FROM Autovehicule 
+               WHERE ID_Autovehicul NOT IN (
+                   SELECT Id_Autovehicul 
+                   FROM Contracte 
+                   WHERE Status_Contract IN ('Activ', 'Acceptat')
+               )";
             using (OleDbCommand cmd = new OleDbCommand(sql, conn))
             using (OleDbDataReader reader = cmd.ExecuteReader())
             {

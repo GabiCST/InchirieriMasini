@@ -111,6 +111,28 @@ public class AdminMasiniController : ControllerBase
                     }
                 }
             }
+
+            using (OleDbCommand cEv = new OleDbCommand("SELECT ID_Eveniment, Nume_Eveniment, Tip, Data_Eveniment, Locatie, Descriere, Costul_Reparatiei FROM Evenimente_Rutiere WHERE Id_autovehicul = ?", conn))
+            {
+                cEv.Parameters.AddWithValue("?", id);
+                using (OleDbDataReader r = (OleDbDataReader)await cEv.ExecuteReaderAsync())
+                {
+                    while (r.Read())
+                    {
+                        masina.Evenimente.Add(new EvenimentRequest 
+                        { 
+                            ID_Eveniment = Convert.ToInt32(r["ID_Eveniment"]),
+                            Nume_Eveniment = r["Nume_Eveniment"]?.ToString() ?? "",
+                            Tip = r["Tip"]?.ToString() ?? "",
+                            Data_Eveniment = r["Data_Eveniment"] != DBNull.Value ? Convert.ToDateTime(r["Data_Eveniment"]) : DateTime.MinValue,
+                            Locatie = r["Locatie"]?.ToString() ?? "",
+                            Descriere = r["Descriere"]?.ToString() ?? "",
+                            Costul_Reparatiei = r["Costul_Reparatiei"] != DBNull.Value ? Convert.ToInt32(r["Costul_Reparatiei"]) : 0,
+                            Id_autovehicul = id
+                        });
+                    }
+                }
+            }
         }
         return Ok(masina);
     }
@@ -227,10 +249,7 @@ public class AdminMasiniController : ControllerBase
                 while (r.Read())
                 {
                     string? val = r[0]?.ToString();
-                    if (val != null)
-                    {
-                        existente.Add(val);
-                    }
+                    if (val != null) existente.Add(val);
                 }
             }
         }
@@ -257,30 +276,89 @@ public class AdminMasiniController : ControllerBase
             }
         }
     }
-    [HttpDelete("stergere/{id}")]
-public async Task<IActionResult> StergeMasina(int id)
-{
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    
-    using (OleDbConnection conn = new OleDbConnection(_connectionString))
-    {
-        await conn.OpenAsync();
-        string sqlCheck = "SELECT EsteAdmin FROM Users WHERE ID = ?";
-        using (OleDbCommand cmdCheck = new OleDbCommand(sqlCheck, conn))
-        {
-            cmdCheck.Parameters.AddWithValue("?", userId);
-            bool isAdmin = Convert.ToBoolean(await cmdCheck.ExecuteScalarAsync() ?? false);
-            
-            if (!isAdmin) return Forbid();
-        }
 
-        string sqlDelete = "DELETE FROM Autovehicule WHERE ID_Autovehicul = ?";
-        using (OleDbCommand cmdDel = new OleDbCommand(sqlDelete, conn))
+    [HttpDelete("stergere/{id}")]
+    public async Task<IActionResult> StergeMasina(int id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
         {
-            cmdDel.Parameters.AddWithValue("?", id);
-            await cmdDel.ExecuteNonQueryAsync();
+            await conn.OpenAsync();
+            string sqlCheck = "SELECT EsteAdmin FROM Users WHERE ID = ?";
+            using (OleDbCommand cmdCheck = new OleDbCommand(sqlCheck, conn))
+            {
+                cmdCheck.Parameters.AddWithValue("?", userId);
+                bool isAdmin = Convert.ToBoolean(await cmdCheck.ExecuteScalarAsync() ?? false);
+                if (!isAdmin) return Forbid();
+            }
+
+            string sqlDelete = "DELETE FROM Autovehicule WHERE ID_Autovehicul = ?";
+            using (OleDbCommand cmdDel = new OleDbCommand(sqlDelete, conn))
+            {
+                cmdDel.Parameters.AddWithValue("?", id);
+                await cmdDel.ExecuteNonQueryAsync();
+            }
         }
+        return Ok();
     }
-    return Ok();
+
+    [HttpPost("adaugare-eveniment")]
+    public async Task<IActionResult> AdaugaEveniment([FromBody] EvenimentRequest req)
+    {
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            string sql = "INSERT INTO Evenimente_Rutiere (Nume_Eveniment, Tip, Data_Eveniment, Locatie, Descriere, Costul_Reparatiei, Id_autovehicul) VALUES (?,?,?,?,?,?,?)";
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("?", req.Nume_Eveniment);
+                cmd.Parameters.AddWithValue("?", req.Tip);
+                cmd.Parameters.AddWithValue("?", req.Data_Eveniment.Date);
+                cmd.Parameters.AddWithValue("?", req.Locatie);
+                cmd.Parameters.AddWithValue("?", req.Descriere);
+                cmd.Parameters.AddWithValue("?", req.Costul_Reparatiei);
+                cmd.Parameters.AddWithValue("?", req.Id_autovehicul);
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        return Ok();
+    }
+    [HttpPut("modifica-eveniment/{id}")]
+    public async Task<IActionResult> ModificaEveniment(int id, [FromBody] EvenimentRequest req)
+    {
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            string sql = "UPDATE Evenimente_Rutiere SET Nume_Eveniment=?, Tip=?, Data_Eveniment=?, Locatie=?, Descriere=?, Costul_Reparatiei=? WHERE ID_Eveniment=?";
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("?", req.Nume_Eveniment);
+                cmd.Parameters.AddWithValue("?", req.Tip);
+                cmd.Parameters.AddWithValue("?", req.Data_Eveniment.Date);
+                cmd.Parameters.AddWithValue("?", req.Locatie);
+                cmd.Parameters.AddWithValue("?", req.Descriere);
+                cmd.Parameters.AddWithValue("?", req.Costul_Reparatiei);
+                cmd.Parameters.AddWithValue("?", id);
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        return Ok();
+    }
+
+    [HttpDelete("sterge-eveniment/{id}")]
+    public async Task<IActionResult> StergeEveniment(int id)
+    {
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            string sql = "DELETE FROM Evenimente_Rutiere WHERE ID_Eveniment = ?";
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("?", id);
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        return Ok();
     }
 }
