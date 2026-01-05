@@ -213,20 +213,24 @@ function CarDetails() {
                         <h3>🚗 Istoric Evenimente Rutiere</h3>
                         <div className="events-container">
                             {masina.evenimente && masina.evenimente.length > 0 ? (
-                                masina.evenimente.map((ev, index) => (
-                                    <div key={index} className="event-row">
-                                        <div className="event-main">
-                                            <span className="event-badge">{ev.tip}</span>
-                                            <span className="event-date">{new Date(ev.data).toLocaleDateString('ro-RO')}</span>
-                                            <span className="event-location">📍 {ev.locatie}</span>
-                                        </div>
-                                        <p className="event-desc">{ev.descriere}</p>
-                                        <div className="event-footer">
-                                            Cost reparație: <span className="event-cost">{ev.cost}€</span>
-                                        </div>
+                            masina.evenimente.map((ev, index) => (
+                                <div key={index} className="event-row">
+                                    <div className="event-main">
+                                        <span className="event-badge">{ev.tip}</span>
+                                        <span className="event-date">
+                                            {ev.data_Eveniment 
+                                                ? new Date(ev.data_Eveniment).toLocaleDateString('ro-RO') 
+                                                : 'Data necunoscută'}
+                                        </span>
+                                        <span className="event-location">📍 {ev.locatie}</span>
                                     </div>
-                                ))
-                            ) : <p className="no-data">Niciun eveniment rutier înregistrat pentru acest autovehicul.</p>}
+                                    <p className="event-desc">{ev.descriere}</p>
+                                    <div className="event-footer">
+                                        Cost reparație: <span className="event-cost">{ev.costul_Reparatiei}€</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : <p className="no-data">Niciun eveniment rutier înregistrat.</p>}
                         </div>
                     </div>
                 </div>

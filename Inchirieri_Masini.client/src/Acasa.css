@@ -17,11 +17,10 @@
     z-index: 100;
 }
 
-/* BUTON NOU CONTACTE NAVIGARE */
 .contact-btn-nav {
     margin-left: 20px;
     padding: 10px 20px;
-    background-color: #28a745; /* Verde pentru a se distinge */
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 30px;
@@ -32,6 +31,7 @@
     transition: all 0.2s ease;
     white-space: nowrap;
 }
+
 
 .contact-btn-nav:hover {
     background-color: #218838;
@@ -402,9 +402,6 @@ h1 {
     border-color: #007bff;
 }
 
-/* =========================================
-   STILURI MODAL CONTACTE (NOI)
-   ========================================= */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -521,7 +518,6 @@ h1 {
 @media (max-width: 850px) {
     .navbar { flex-direction: column; gap: 20px; }
     .search-bar { max-width: 100%; }
-    /* Pe mobil butonul de contacte sa fie lat */
     .contact-btn-nav { margin-left: 0; width: 100%; }
     .header-actions { flex-direction: column; gap: 20px; align-items: stretch; }
     .admin-header-buttons { flex-direction: column; }
