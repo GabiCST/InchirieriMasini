@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.OleDb;
 using System.Runtime.Versioning;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 [Authorize]
 [ApiController]
@@ -156,5 +159,221 @@ public class AdminContractController : ControllerBase
                 }
             }
         }
+    }
+
+    [HttpGet("proces-verbal-pdf/{id}")]
+    public IActionResult GenerareProcesVerbalPdf(int id)
+    {
+        byte[] pdfBytes;
+        string numeAdmin = User.Identity?.Name ?? "Administrator Sistem";
+
+        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        {
+           
+            string query = @"SELECT c.ID_Contract, c.Data_Intocmiri, c.Avans, c.Suma_Totala_Estimata, 
+                                    u.Nume_Prenume, a.Model
+                            FROM ((Contracte c
+                            INNER JOIN Users u ON c.ID_Client = u.ID)
+                            INNER JOIN Autovehicule a ON c.Id_Autovehicul = a.ID_Autovehicul)
+                            WHERE c.ID_Contract = ?";
+
+            OleDbCommand command = new OleDbCommand(query, connection);
+            command.Parameters.Add("?", OleDbType.Integer).Value = id;
+            connection.Open();
+
+            using (OleDbDataReader reader = command.ExecuteReader())
+            {
+                if (!reader.Read()) return NotFound();
+
+                double sumaTotala = reader["Suma_Totala_Estimata"] != DBNull.Value ? Convert.ToDouble(reader["Suma_Totala_Estimata"]) : 0;
+                double avans = reader["Avans"] != DBNull.Value ? Convert.ToDouble(reader["Avans"]) : 0;
+                double restDePlata = sumaTotala - avans; 
+
+                string client = reader["Nume_Prenume"]?.ToString() ?? "N/A";
+                string auto = reader["Model"]?.ToString() ?? "N/A";
+                DateTime dataContract = reader["Data_Intocmiri"] != DBNull.Value ? Convert.ToDateTime(reader["Data_Intocmiri"]) : DateTime.Now;
+
+                QuestPDF.Settings.License = LicenseType.Community;
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(2, Unit.Centimetre);
+
+                        page.Header().Text("PROCES VERBAL DE PREDARE").FontSize(20).Bold().FontColor(Colors.Blue.Medium);
+
+                        page.Content().PaddingTop(20).Column(col =>
+                        {
+                            col.Spacing(8);
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Contract:").Bold();
+                                row.RelativeItem().Text($"#{id}");
+                            });
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Data Document:").Bold();
+                                row.RelativeItem().Text($"{dataContract:dd.MM.yyyy}");
+                            });
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Client:").Bold();
+                                row.RelativeItem().Text(client);
+                            });
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Autovehicul:").Bold();
+                                row.RelativeItem().Text(auto);
+                            });
+
+                            col.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Avans încasat:").Bold();
+                                row.RelativeItem().Text($"{avans} EUR").FontColor(Colors.Green.Medium).Bold();
+                            });
+                            col.Item().Row(row => {
+                                row.RelativeItem().Text("Rest de plată (fără penalizări):").Bold();
+                                row.RelativeItem().Text($"{restDePlata} EUR").Bold();
+                            });
+                            col.Item().PaddingTop(40).Text(t => {
+                                t.Span("Document generat de administrator: ").Italic();
+                                t.Span(numeAdmin).Bold();
+                            });
+                        });
+
+                        page.Footer().AlignCenter().Text(x => {
+                            x.Span("Pagina ");
+                            x.CurrentPageNumber();
+                        });
+                    });
+                });
+                pdfBytes = document.GeneratePdf();
+            }
+        }
+        return File(pdfBytes, "application/pdf", $"ProcesVerbal_{id}.pdf");
+    }
+
+   [HttpGet("proces-verbal-primire-pdf/{id}")]
+    public IActionResult GenerareProcesVerbalPrimirePdf(int id)
+    {
+        byte[] pdfBytes;
+        string numePrenumeAdmin = "Administrator";
+        string? currentUsername = User.Identity?.Name;
+
+        using (OleDbConnection connection = new OleDbConnection(_connectionString))
+        {
+            connection.Open();
+
+            if (!string.IsNullOrEmpty(currentUsername))
+            {
+                string adminQuery = "SELECT Nume_Prenume FROM Users WHERE Username = ?";
+                using (OleDbCommand adminCmd = new OleDbCommand(adminQuery, connection))
+                {
+                    adminCmd.Parameters.Add("?", OleDbType.VarWChar).Value = currentUsername;
+                    var result = adminCmd.ExecuteScalar();
+                    if (result != null) numePrenumeAdmin = result.ToString() ?? "Administrator";
+                }
+            }
+
+            string query = @"SELECT c.ID_Contract, c.Data_Intocmiri, c.Avans, c.Suma_Totala_Estimata, 
+                                    u.Nume_Prenume AS NumeClient, a.Model, 
+                                    f.Suma_Penalizare, f.Rest, f.Observatii_Returnare
+                            FROM ((Contracte c
+                            INNER JOIN Users u ON c.ID_Client = u.ID)
+                            INNER JOIN Autovehicule a ON c.Id_Autovehicul = a.ID_Autovehicul)
+                            LEFT JOIN FinalizareContract f ON c.ID_Contract = f.ID_Contract
+                            WHERE c.ID_Contract = ?";
+
+            using (OleDbCommand command = new OleDbCommand(query, connection))
+            {
+                command.Parameters.Add("?", OleDbType.Integer).Value = id;
+                using (OleDbDataReader reader = command.ExecuteReader())
+                {
+                    if (!reader.Read()) return NotFound();
+
+                    double sumaEstimata = reader["Suma_Totala_Estimata"] != DBNull.Value ? Convert.ToDouble(reader["Suma_Totala_Estimata"]) : 0;
+                    double avans = reader["Avans"] != DBNull.Value ? Convert.ToDouble(reader["Avans"]) : 0;
+                    double penalizare = reader["Suma_Penalizare"] != DBNull.Value ? Convert.ToDouble(reader["Suma_Penalizare"]) : 0;
+                    double restPlata = reader["Rest"] != DBNull.Value ? Convert.ToDouble(reader["Rest"]) : (sumaEstimata - avans);
+                    
+                    double totalDePlatit = restPlata + penalizare;
+                    double totalGeneral = avans + restPlata + penalizare;
+
+                    string client = reader["NumeClient"]?.ToString() ?? "N/A";
+                    string modelAuto = reader["Model"]?.ToString() ?? "N/A";
+                    string observatii = reader["Observatii_Returnare"]?.ToString() ?? "N/A";
+                    DateTime dataDoc = reader["Data_Intocmiri"] != DBNull.Value ? Convert.ToDateTime(reader["Data_Intocmiri"]) : DateTime.Now;
+
+                    QuestPDF.Settings.License = LicenseType.Community;
+                    var document = Document.Create(container =>
+                    {
+                        container.Page(page =>
+                        {
+                            page.Size(PageSizes.A4);
+                            page.Margin(1.5f, Unit.Centimetre);
+                            
+                            page.Header().Row(row => {
+                                row.RelativeItem().Column(col => {
+                                    col.Item().Text("PROCES VERBAL DE PRIMIRE").FontSize(22).Bold().FontColor(Colors.Blue.Medium);
+                                    col.Item().Text($"Contract nr: #{id}").FontSize(12);
+                                });
+                                row.RelativeItem().AlignRight().Text(DateTime.Now.ToString("dd.MM.yyyy")).FontSize(10);
+                            });
+
+                            page.Content().PaddingTop(20).Column(col =>
+                            {
+                                col.Item().Text(t => { t.Span("Client: ").Bold(); t.Span(client); });
+                                col.Item().Text(t => { t.Span("Autovehicul: ").Bold(); t.Span(modelAuto); });
+                                col.Item().Text(t => { t.Span("Data Contract: ").Bold(); t.Span(dataDoc.ToString("dd.MM.yyyy")); });
+
+                                col.Item().PaddingTop(20).Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns => {
+                                        columns.RelativeColumn();
+                                        columns.ConstantColumn(120);
+                                    });
+
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).Text("Suma Contractuala");
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).AlignRight().Text($"{sumaEstimata} EUR");
+
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).Text("Avans Incasat");
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).AlignRight().Text($"{avans} EUR");
+
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).Text("Rest de Plata");
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).AlignRight().Text($"{restPlata} EUR");
+
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).Text("Suma Penalizare");
+                                    table.Cell().BorderBottom(1).PaddingVertical(5).AlignRight().Text($"{penalizare} EUR");
+
+                                    table.Cell().PaddingVertical(10).Text("TOTAL DE PLATIT (Rest + Penalizari)").Bold();
+                                    table.Cell().PaddingVertical(10).AlignRight().Text($"{totalDePlatit} EUR").Bold().FontColor(Colors.Red.Medium);
+
+                                    table.Cell().Background(Colors.Grey.Lighten3).Padding(8).Text("TOTAL GENERAL CONTRACT").Bold();
+                                    table.Cell().Background(Colors.Grey.Lighten3).Padding(8).AlignRight().Text($"{totalGeneral} EUR").Bold().FontSize(14);
+                                });
+
+                                col.Item().PaddingTop(30).Column(obsCol => {
+                                    obsCol.Item().Text("Observatii Returnare:").Bold();
+                                    obsCol.Item().Border(0.5f).Padding(10).Text(observatii).Italic();
+                                });
+
+                                col.Item().PaddingTop(40).Row(row => {
+                                    row.RelativeItem().AlignRight().Column(adminCol => {
+                                        adminCol.Item().AlignRight().Text("Administrator:").FontSize(10).Italic();
+                                        adminCol.Item().AlignRight().Text(numePrenumeAdmin).Bold();
+                                        adminCol.Item().PaddingTop(10).AlignRight().Text("__________________________");
+                                        adminCol.Item().AlignRight().Text("Semnatura");
+                                    });
+                                });
+                            });
+
+                            page.Footer().AlignCenter().Text(x => {
+                                x.Span("Pagina ");
+                                x.CurrentPageNumber();
+                            });
+                        });
+                    });
+                    pdfBytes = document.GeneratePdf();
+                }
+            }
+        }
+        return File(pdfBytes, "application/pdf", $"ProcesVerbal_Primire_{id}.pdf");
     }
 }

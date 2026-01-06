@@ -30,7 +30,6 @@ function CarDetails() {
                 setLoading(false);
             }
         };
-
         fetchDetalii();
     }, [id]);
 
@@ -72,13 +71,13 @@ function CarDetails() {
 
         const token = localStorage.getItem('token');
         try {
-            const responseProfil = await fetch('/api/Profil/detalii', {
+            const responseProfil = await fetch('/api/ProfilUser/detalii', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (responseProfil.ok) {
                 const profil = await responseProfil.json();
-                const idClientFinal = profil.userId || profil.id_Client || profil.id;
+                const idClientFinal = profil.id;
                 const esteProfilIncomplet = !profil.ci || !profil.adresa || !profil.serie_carnet;
 
                 const dateRezervare = { 
@@ -137,18 +136,15 @@ function CarDetails() {
         <div className="details-container">
             <div className={`content-wrapper ${showModal ? 'blur-background' : ''}`}>
                 <button className="back-btn" onClick={() => navigate('/acasa')}>&larr; Înapoi la listă</button>
-                
                 <div className="details-card">
                     <div className="details-image-section">
                         <img src={masina.img} alt={masina.model} className="main-car-image"/>
                     </div>
-
                     <div className="details-info-section">
                         <h1 className="car-title">{masina.model}</h1>
                         <div className="car-price">
                             {masina.pret}€ <span className="per-day">/ zi</span>
                         </div>
-
                         <div className="car-specs-grid">
                             <div className="spec-box">
                                 <span className="label">Motorizare</span>
@@ -163,15 +159,10 @@ function CarDetails() {
                                 <span className="value">{masina.numar_Inmatriculare}</span>
                             </div>
                         </div>
-
                         <p className="car-description">{masina.descriere}</p>
-
                         <div className="action-area">
                             {isAdmin ? (
-                                <button 
-                                    className="rent-btn admin-modify-btn" 
-                                    onClick={() => navigate(`/modifica-masina/${id}`)}
-                                >
+                                <button className="rent-btn admin-modify-btn" onClick={() => navigate(`/modifica-masina/${id}`)}>
                                     ✏️ Modifică Datele Mașinii
                                 </button>
                             ) : (
@@ -182,7 +173,6 @@ function CarDetails() {
                         </div>
                     </div>
                 </div>
-
                 <h2 className="section-header">Informații Suplimentare</h2>
                 <div className="info-grid">
                     <div className="info-card">
@@ -197,7 +187,6 @@ function CarDetails() {
                             ) : <p>Nu sunt dotări specificate.</p>}
                         </div>
                     </div>
-
                     <div className="info-card">
                         <h3>📋 Condiții de Închiriere</h3>
                         <ul className="conditions-list">
@@ -208,7 +197,6 @@ function CarDetails() {
                             ) : <p>Nu sunt condiții specifice.</p>}
                         </ul>
                     </div>
-
                     <div className="info-card wide-card">
                         <h3>🚗 Istoric Evenimente Rutiere</h3>
                         <div className="events-container">
@@ -218,9 +206,7 @@ function CarDetails() {
                                     <div className="event-main">
                                         <span className="event-badge">{ev.tip}</span>
                                         <span className="event-date">
-                                            {ev.data_Eveniment 
-                                                ? new Date(ev.data_Eveniment).toLocaleDateString('ro-RO') 
-                                                : 'Data necunoscută'}
+                                            {ev.data_Eveniment ? new Date(ev.data_Eveniment).toLocaleDateString('ro-RO') : 'Data necunoscută'}
                                         </span>
                                         <span className="event-location">📍 {ev.locatie}</span>
                                     </div>
@@ -235,7 +221,6 @@ function CarDetails() {
                     </div>
                 </div>
             </div>
-
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -244,26 +229,11 @@ function CarDetails() {
                         <div className="date-inputs">
                             <label>
                                 Data Preluare:
-                                <input 
-                                    type="date" 
-                                    name="startDate"
-                                    value={dates.startDate} 
-                                    min={today}
-                                    onChange={handleDateChange} 
-                                    required 
-                                />
+                                <input type="date" name="startDate" value={dates.startDate} min={today} onChange={handleDateChange} required />
                             </label>
                             <label>
                                 Data Returnare:
-                                <input 
-                                    type="date" 
-                                    name="endDate"
-                                    value={dates.endDate} 
-                                    min={dates.startDate || today}
-                                    disabled={!dates.startDate}
-                                    onChange={handleDateChange} 
-                                    required 
-                                />
+                                <input type="date" name="endDate" value={dates.endDate} min={dates.startDate || today} disabled={!dates.startDate} onChange={handleDateChange} required />
                             </label>
                         </div>
                         <div className="price-summary">
