@@ -138,14 +138,57 @@ function AdminContracte() {
         }
     };
 
-    const handleEmitereProcesVerbal = (id, e) => {
+    const handleEmitereProcesVerbal = async (id, e) => {
         e.stopPropagation();
-        alert(`📄 S-a generat Procesul Verbal de Predare pentru contractul #${id}!`);
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/AdminContract/proces-verbal-pdf/${id}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Proces_Verbal_${id}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert("Eroare la generarea Procesului Verbal.");
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
-    const handleEmitereFactura = (contract) => {
-        const total = (contract.avans || 0) + (parseInt(finalizareData.restPlata) || 0) + (parseInt(finalizareData.penalizare) || 0);
-        alert(`📄 Factură Generată:\nClient: ${contract.numeClient}\nTotal General: ${total} EURO`);
+    const handleEmitereFactura = async (contract) => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/AdminContract/proces-verbal-primire-pdf/${contract.iD_Contract}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Factura_Contract_${contract.iD_Contract}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert("Eroare la generarea facturii.");
+            }
+        } catch (error) {
+            console.error("Download error:", error);
+        }
     };
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('ro-RO') : '-';

@@ -26,7 +26,7 @@ public class ProfilUserController : ControllerBase
 
         using (OleDbConnection connection = new OleDbConnection(_connectionString))
         {
-            string sql = @"SELECT u.Nume_Prenume, u.NumarTelefon, d.CI, d.Adresa, d.Serie_Carnet, d.Data_expirare 
+            string sql = @"SELECT u.ID, u.Nume_Prenume, u.NumarTelefon, d.CI, d.Adresa, d.Serie_Carnet, d.Data_expirare 
                            FROM Users u 
                            LEFT JOIN Detalii_User d ON u.ID = d.Id_User 
                            WHERE u.ID = ? AND u.EsteAdmin = 0";
@@ -44,6 +44,7 @@ public class ProfilUserController : ControllerBase
                         string[] parti = complet.Split(' ', 2);
 
                         return Ok(new {
+                            id = Convert.ToInt32(reader["ID"]),
                             nume = parti.Length > 0 ? parti[0] : "",
                             prenume = parti.Length > 1 ? parti[1] : "",
                             telefon = reader["NumarTelefon"]?.ToString(),
