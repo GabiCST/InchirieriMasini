@@ -283,6 +283,53 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(198, 40, 40, 0.1);
 }
+.inline-add-group {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.btn-switch {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: #28a745;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-anulare{
+
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: #dc3545;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-confirm-new {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: #28a745;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.inline-input {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+}
 @media (max-width: 768px) {
     .admin-card { padding: 25px; }
     .form-grid, .form-grid.three-cols { grid-template-columns: 1fr; }
