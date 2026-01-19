@@ -18,6 +18,10 @@ function AdminMasina() {
 
     const [isAddingDotare, setIsAddingDotare] = useState(false);
     const [isAddingConditie, setIsAddingConditie] = useState(false);
+    const [modeDotare, setModeDotare] = useState('select');
+    const [modeConditie, setModeConditie] = useState('select');
+    const [newDotareName, setNewDotareName] = useState('');
+    const [newConditieName, setNewConditieName] = useState('');
 
     const [existingEvents, setExistingEvents] = useState([]);
     const [isAddingEveniment, setIsAddingEveniment] = useState(false);
@@ -66,6 +70,38 @@ function AdminMasina() {
         };
         fetchData();
     }, [id]);
+
+    const handleSaveNewNomenclator = async (tip) => {
+        const isDotare = tip === 'dotare';
+        const nume = isDotare ? newDotareName : newConditieName;
+        if (!nume.trim()) return;
+
+        const token = localStorage.getItem('token');
+        const url = isDotare ? '/api/AdminMasini/adaugare-dotare-noua' : '/api/AdminMasini/adaugare-conditie-noua';
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ nume: nume })
+        });
+
+        if (res.ok) {
+            const newItem = await res.json();
+            if (isDotare) {
+                setAllDotari([...allDotari, newItem]);
+                setSelectedDotari([...selectedDotari, newItem.id.toString()]);
+                setNewDotareName('');
+                setModeDotare('select');
+                setIsAddingDotare(false);
+            } else {
+                setAllConditii([...allConditii, newItem]);
+                setSelectedConditii([...selectedConditii, newItem.id.toString()]);
+                setNewConditieName('');
+                setModeConditie('select');
+                setIsAddingConditie(false);
+            }
+        }
+    };
 
     const openEditEveniment = (ev) => {
         setEvenimentData({
@@ -201,10 +237,23 @@ function AdminMasina() {
                             );
                         })}
                         {isAddingDotare ? (
-                            <select autoFocus className="inline-select" onChange={(e) => handleAdd(e.target.value, selectedDotari, setSelectedDotari, setIsAddingDotare)} onBlur={() => setIsAddingDotare(false)}>
-                                <option value="">Alege...</option>
-                                {allDotari.filter(d => !selectedDotari.includes(d.id.toString())).map(d => <option key={d.id} value={d.id}>{d.nume}</option>)}
-                            </select>
+                            <div className="inline-add-group">
+                                {modeDotare === 'select' ? (
+                                    <>
+                                        <select autoFocus className="inline-select" onChange={(e) => handleAdd(e.target.value, selectedDotari, setSelectedDotari, setIsAddingDotare)}>
+                                            <option value="">Alege...</option>
+                                            {allDotari.filter(d => !selectedDotari.includes(d.id.toString())).map(d => <option key={d.id} value={d.id}>{d.nume}</option>)}
+                                        </select>
+                                        <button type="button" onClick={() => setModeDotare('new')} className="btn-switch">Adauga dotare noua</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <input type="text" placeholder="Dotare noua" value={newDotareName} onChange={e => setNewDotareName(e.target.value)} className="inline-input" />
+                                        <button type="button" onClick={() => handleSaveNewNomenclator('dotare')} className="btn-confirm-new">Adaugă</button>
+                                        <button type="button" onClick={() => setModeDotare('select')} className="btn-anulare">Anulează</button>
+                                    </>
+                                )}
+                            </div>
                         ) : (
                             <button type="button" className="btn-inline-add" onClick={() => setIsAddingDotare(true)}>+</button>
                         )}
@@ -222,10 +271,23 @@ function AdminMasina() {
                             );
                         })}
                         {isAddingConditie ? (
-                            <select autoFocus className="inline-select" onChange={(e) => handleAdd(e.target.value, selectedConditii, setSelectedConditii, setIsAddingConditie)} onBlur={() => setIsAddingConditie(false)}>
-                                <option value="">Alege...</option>
-                                {allConditii.filter(c => !selectedConditii.includes(c.id.toString())).map(c => <option key={c.id} value={c.id}>{c.nume}</option>)}
-                            </select>
+                            <div className="inline-add-group">
+                                {modeConditie === 'select' ? (
+                                    <>
+                                        <select autoFocus className="inline-select" onChange={(e) => handleAdd(e.target.value, selectedConditii, setSelectedConditii, setIsAddingConditie)}>
+                                            <option value="">Alege...</option>
+                                            {allConditii.filter(c => !selectedConditii.includes(c.id.toString())).map(c => <option key={c.id} value={c.id}>{c.nume}</option>)}
+                                        </select>
+                                        <button type="button" onClick={() => setModeConditie('new')} className="btn-switch">Adauga conditie noua</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <input type="text" placeholder="Conditie noua" value={newConditieName} onChange={e => setNewConditieName(e.target.value)} className="inline-input" />
+                                        <button type="button" onClick={() => handleSaveNewNomenclator('conditie')} className="btn-confirm-new">Adaugă</button>
+                                        <button type="button" onClick={() => setModeConditie('select')} className="btn-anulare">Anulează</button>
+                                    </>
+                                )}
+                            </div>
                         ) : (
                             <button type="button" className="btn-inline-add" onClick={() => setIsAddingConditie(true)}>+</button>
                         )}

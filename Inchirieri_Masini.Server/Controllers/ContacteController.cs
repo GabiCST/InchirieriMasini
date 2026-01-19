@@ -24,8 +24,7 @@ public async Task<IActionResult> GetAdminsContact()
 
     using (OleDbConnection conn = new OleDbConnection(_connectionString))
     {
-        await conn.OpenAsync();
-        // Modificare: EsteAdmin = True (specific Access) sau EsteAdmin = -1
+        await conn.OpenAsync(); 
         string sql = @"SELECT Nume_Prenume, NumarTelefon 
                        FROM Users 
                        WHERE EsteAdmin = True 

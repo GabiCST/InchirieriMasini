@@ -361,4 +361,45 @@ public class AdminMasiniController : ControllerBase
         }
         return Ok();
     }
+
+    [HttpPost("adaugare-dotare-noua")]
+    public async Task<IActionResult> AdaugaDotareNoua([FromBody] Dictionary<string, string> data)
+    {
+        if (!data.ContainsKey("nume") || string.IsNullOrWhiteSpace(data["nume"])) return BadRequest();
+
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            string sql = "INSERT INTO Dotari (Dotare) VALUES (?)";
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("?", data["nume"]);
+                await cmd.ExecuteNonQueryAsync();
+                
+                cmd.CommandText = "SELECT @@IDENTITY";
+                int newId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                return Ok(new { id = newId, nume = data["nume"] });
+            }
+        }
+    }
+    [HttpPost("adaugare-conditie-noua")]
+    public async Task<IActionResult> AdaugaConditieNoua([FromBody] Dictionary<string, string> data)
+    {
+        if (!data.ContainsKey("nume") || string.IsNullOrWhiteSpace(data["nume"])) return BadRequest();
+
+        using (OleDbConnection conn = new OleDbConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            string sql = "INSERT INTO Conditii (Conditie) VALUES (?)";
+            using (OleDbCommand cmd = new OleDbCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("?", data["nume"]);
+                await cmd.ExecuteNonQueryAsync();
+
+                cmd.CommandText = "SELECT @@IDENTITY";
+                int newId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                return Ok(new { id = newId, nume = data["nume"] });
+            }
+        }
+    }
 }
